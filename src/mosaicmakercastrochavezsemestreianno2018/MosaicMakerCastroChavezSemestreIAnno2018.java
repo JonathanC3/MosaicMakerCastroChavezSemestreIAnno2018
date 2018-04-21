@@ -14,9 +14,6 @@ import javafx.application.Application;
  * @author jonathan
  */
 public class MosaicMakerCastroChavezSemestreIAnno2018 {
-    
-    
-
     /**
      * @param args the command line arguments
      */
