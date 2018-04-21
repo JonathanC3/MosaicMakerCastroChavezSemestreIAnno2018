@@ -6,6 +6,8 @@
 package GUI;
 
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -15,13 +17,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
-/**
- *
- * @author jonathan
- */
 public class MainWindow extends Application{
     //Add
     BorderPane layout;
+    Stage window;;
     //add
     
     
@@ -35,7 +34,14 @@ public class MainWindow extends Application{
             //Menu Items
         MenuItem mIt1=new MenuItem("New project...");
             //Agrego un evento al botón menú
-        mIt1.setOnAction(e->menuClicked(1));
+        mIt1.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Cargar carga=new Cargar();
+                carga.start(window);
+            }
+            
+        });
         menu1.getItems().add(mIt1);
             //Separa menú
         menu1.getItems().add(new SeparatorMenuItem());
@@ -51,13 +57,12 @@ public class MainWindow extends Application{
         Scene scene=new Scene(layout, 600, 600);
         primaryStage.setScene(scene);
     //add
-        
         primaryStage.show();
     }
     
     public void menuClicked(int num){
         if(num==1){
-            System.out.println("New project...");
+            
         }
         if(num==2){
             System.out.println("Open project...");
