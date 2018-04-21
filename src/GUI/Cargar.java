@@ -68,8 +68,13 @@ public class Cargar extends Application {
                       
             try {
                 BufferedImage bufferedImage = ImageIO.read(file);
+                String s=file.toString();
+                System.out.println(s);
                 Image image = SwingFXUtils.toFXImage(bufferedImage, null);
+                
                 myImageView.setImage(image);
+                
+                
             } catch (IOException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             }

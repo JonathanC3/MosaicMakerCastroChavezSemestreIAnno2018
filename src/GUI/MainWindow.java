@@ -4,8 +4,11 @@
  * and open the template in the editor.
  */
 package GUI;
-
+import GUI.Cargar;
+import GUI.Bar;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -21,7 +24,12 @@ import javafx.stage.Stage;
  */
 public class MainWindow extends Application{
     //Add
+    
+
     BorderPane layout;
+    Application window;
+    Stage bar;
+    
     //add
     
     
@@ -35,12 +43,26 @@ public class MainWindow extends Application{
             //Menu Items
         MenuItem mIt1=new MenuItem("New project...");
             //Agrego un evento al botón menú
-        mIt1.setOnAction(e->menuClicked(1));
+        mIt1.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Cargar c=new Cargar();
+                c.start(primaryStage);
+            }
+            
+        });
         menu1.getItems().add(mIt1);
             //Separa menú
         menu1.getItems().add(new SeparatorMenuItem());
         MenuItem mIt2=new MenuItem("Open project...");
-        mIt2.setOnAction(a->menuClicked(2));
+        
+        mIt2.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Bar b=new Bar();
+                b.start(primaryStage);
+            }
+        });
         menu1.getItems().add(mIt2);
             //Menu Bar
         MenuBar mBar=new MenuBar();
@@ -51,13 +73,12 @@ public class MainWindow extends Application{
         Scene scene=new Scene(layout, 600, 600);
         primaryStage.setScene(scene);
     //add
-        
         primaryStage.show();
     }
     
     public void menuClicked(int num){
         if(num==1){
-            System.out.println("New project...");
+            
         }
         if(num==2){
             System.out.println("Open project...");
