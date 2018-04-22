@@ -28,7 +28,7 @@ public class MainWindow extends Application{
 
     BorderPane layout;
     Application window;
-    Stage bar;
+    
     
     //add
     
