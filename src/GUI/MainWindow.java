@@ -6,6 +6,8 @@
 package GUI;
 import GUI.Cargar;
 import GUI.Bar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -45,9 +47,13 @@ public class MainWindow extends Application{
             //Agrego un evento al botón menú
         mIt1.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(ActionEvent event) {
-                Cargar c=new Cargar();
-                c.start(primaryStage);
+            public void handle(ActionEvent event){
+                try {
+                    ChooseSize chSize=new ChooseSize();
+                    chSize.start(primaryStage);
+                } catch (Exception ex) {
+                    Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             
         });
@@ -74,14 +80,5 @@ public class MainWindow extends Application{
         primaryStage.setScene(scene);
     //add
         primaryStage.show();
-    }
-    
-    public void menuClicked(int num){
-        if(num==1){
-            
-        }
-        if(num==2){
-            System.out.println("Open project...");
-        }
     }
 }
