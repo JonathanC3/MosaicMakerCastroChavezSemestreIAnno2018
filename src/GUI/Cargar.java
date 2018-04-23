@@ -51,8 +51,6 @@ public class Cargar extends Application {
     
     @Override
     public void start(Stage primaryStage) {
-       
-        
         
         Button btnLoad = new Button("Load");
         btnLoad.setOnAction(btnLoadEventListener);

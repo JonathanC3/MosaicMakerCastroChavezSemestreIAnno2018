@@ -65,8 +65,12 @@ public class MainWindow extends Application{
         mIt2.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                Bar b=new Bar();
-                b.start(primaryStage);
+                try {
+                    LoadProject ld=new LoadProject();
+                    ld.start(primaryStage);
+                } catch (Exception ex) {
+                    Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         menu1.getItems().add(mIt2);

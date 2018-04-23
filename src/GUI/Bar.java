@@ -23,7 +23,7 @@ public class Bar extends Application {
     final Image[] images = new Image[5];
     final ImageView[] pics = new ImageView[5];
     final VBox vb = new VBox();
-    final Label fileName = new Label();
+    final Label fileName = new Label("Hi");
     final String [] imageNames = new String [] {"fondoPrincipal.png", "fondoPrincipal.png",
         "fondoPrincipal.png", "fondoPrincipal.png", "fondoPrincipal.png"};
  
