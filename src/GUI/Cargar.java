@@ -59,11 +59,11 @@ public class Cargar extends Application {
         myImageView = new ImageView();
         
         sp = new ScrollPane();
-        sp.setPrefSize(300, 250);
-        sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        sp.setContent(myImageView);
-        
+//        sp.setPrefSize(300, 250);
+//        sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+//        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+//        sp.setContent(myImageView);
+//        
         
         
         GridPane gp = new GridPane();
@@ -95,8 +95,8 @@ public class Cargar extends Application {
 
         @Override
         public void handle(ActionEvent t) {
-    
-            getImageView();
+               getScrollPane();
+            
         }
     };
     private ImageView getImageView(){
@@ -126,5 +126,12 @@ public class Cargar extends Application {
             }
             return myImageView;
     }
-   
+   private ScrollPane getScrollPane(){
+       
+       sp.setPrefSize(300, 250);
+       sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+       sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+       sp.setContent(getImageView());
+       return sp;
+   }
 }
