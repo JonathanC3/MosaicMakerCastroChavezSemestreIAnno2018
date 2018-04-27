@@ -13,23 +13,24 @@ import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
+import javafx.scene.image.WritableImage;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javax.imageio.ImageIO;
@@ -42,21 +43,33 @@ public class LoadProject extends Application{
     
     HBox hbox;
     VBox vbox;
-    GridPane gridP, gridP1;
+    BorderPane[][] bPane;
+    BorderPane bpGen;
     Button btnSearch, btnLoad;
-    ImageView myImage, myImage2;
-    BackgroundImage back;
-    Background b;
+    ImageView myImage; 
+    ImageView myImage2;
+    ImageView imv=new ImageView();
+    
+    GraphicsContext gContext;
+    Canvas gen=new Canvas(100, 100);
+    private int cw=300;
+    private int ch=300;
     
     @Override
     public void start(Stage stage) throws Exception {
+        
         //instancio el hbox y el vbox y les doy el espacio entre cada child
         hbox=new HBox(10);
         vbox=new VBox(10);
         
-        //instancio los gridpane
-        gridP=new GridPane();
-        gridP1=new GridPane();
+        //instancia de borderpanes
+        bPane=new BorderPane[10][10];
+        bpGen=new BorderPane();
+        for(int i=0; i<10;i++){
+            for(int x=0; x<10; x++){
+                bPane[i][x]=bpGen;
+            }
+        }
         
         //instancio los botones
         btnSearch=new Button("Search Project");
@@ -67,7 +80,29 @@ public class LoadProject extends Application{
         myImage2=new ImageView();
         
         //declaro las acciones de cada boton
-        btnSearch.setOnAction(btnLoadEventListener);
+        btnSearch.setOnAction(new EventHandler<ActionEvent>(){
+
+            @Override
+            public void handle(ActionEvent t) {
+                
+                Image im=getImageView();
+                int h=100;
+                int w=100;
+                gen.setWidth(w);
+                gen.setHeight(h);
+                
+                //WritableImage wim=new WritableImage(100, 100);
+                for(int i=0; i<10; i++){
+                    System.out.println(i);
+                    gen=new Canvas();
+                    gContext=gen.getGraphicsContext2D();
+                    gContext.drawImage(im, i*100, i*100, w, h, i*100, i*100, w, h);
+                    
+                    bPane[i][0].setCenter(gen);
+                    bPane[i][0].setPrefSize(w, h);
+                }
+            }
+        });
         btnLoad.setOnAction(btnLoad2EventListener);
         
         //instancio el scene y lo agrego al stage
@@ -79,36 +114,20 @@ public class LoadProject extends Application{
         vbox.getChildren().addAll(btnSearch, btnLoad);
         vbox.setVisible(true);
         
-        //agrego todo al hbox
-        hbox.getChildren().addAll(vbox, gridP, gridP1);
+        bpGen.setVisible(true);
+        hbox.getChildren().addAll(vbox, bpGen);
         hbox.setVisible(true);
-        
-        
-        //Definición del primer gridpane
-//        gridP.setPadding(new Insets(10, 10, 10, 10));
-//        gridP1.setPadding(new Insets(10, 10, 10, 10));
-//        gridP.setPrefSize(50, 200);
-//        gridP.setAlignment(Pos.TOP_LEFT);
-//        gridP.setBackground(b);
-//        gridP.setVisible(true);
-        GridPane.setConstraints(myImage, 0, 0);
-        gridP.getChildren().add(myImage);
-        
-        GridPane.setConstraints(myImage2, 1, 0);
-        gridP1.getChildren().add(myImage2);
-        gridP1.setStyle("-fx-grid-lines-visible: true");
     }
     
     EventHandler<ActionEvent> btnLoadEventListener = new EventHandler<ActionEvent>(){
 
         @Override
         public void handle(ActionEvent t) {
-    
-            getImageView();
+            //getImageView();
         }
     };
     
-    private ImageView getImageView(){
+    private Image getImageView(){
         FileChooser fileChooser = new FileChooser();
             
             //Set extension filter
@@ -126,12 +145,10 @@ public class LoadProject extends Application{
                 Image image = SwingFXUtils.toFXImage(bufferedImage, null);
                 
                 myImage.setImage(image);
-                back=new BackgroundImage(myImage.getImage(), BackgroundRepeat.SPACE, BackgroundRepeat.SPACE, BackgroundPosition.CENTER, BackgroundSize.DEFAULT);
-                b=new Background(back);
             } catch (IOException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
-            return myImage;
+            return myImage.getImage();
     }
     
     EventHandler<ActionEvent> btnLoad2EventListener = new EventHandler<ActionEvent>(){
@@ -161,11 +178,19 @@ public class LoadProject extends Application{
                 Image image = SwingFXUtils.toFXImage(bufferedImage, null);
                 
                 myImage2.setImage(image);
-                back=new BackgroundImage(myImage.getImage(), BackgroundRepeat.SPACE, BackgroundRepeat.SPACE, BackgroundPosition.CENTER, BackgroundSize.DEFAULT);
-                b=new Background(back);
             } catch (IOException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
             return myImage2;
+    }
+    
+    private void initDraw(GraphicsContext gc){
+        double canW=gc.getCanvas().getWidth();
+        double canH=gc.getCanvas().getHeight();
+        
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(5);
+        
+        gc.fill();
     }
 }
