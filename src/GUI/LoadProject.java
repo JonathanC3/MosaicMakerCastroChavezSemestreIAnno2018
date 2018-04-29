@@ -69,8 +69,8 @@ public class LoadProject extends Application{
         btnLoad=new Button("Load Image");
         btnSearch=new Button("Search Project");
         saveProject=new Button("Save Project");
-        btnLoad.setPrefSize(btnSearch.getWidth(), btnSearch.getWidth());
-        saveProject.setPrefSize(btnSearch.getWidth(), btnSearch.getWidth());
+        btnLoad.setPrefWidth(btnSearch.getWidth());
+        saveProject.setPrefWidth(btnSearch.getWidth());
         
         //instancio los image view
         myImage=new ImageView();
@@ -84,8 +84,8 @@ public class LoadProject extends Application{
                 //cargo la imagen
                 Image im=getImageView();
                 can1.setVisible(true);
-                can1.setHeight(im.getHeight());
-                can1.setWidth(im.getWidth());
+                can1.setHeight(300);
+                can1.setWidth(300);
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
@@ -107,8 +107,8 @@ public class LoadProject extends Application{
                 //cargo la imagen
                 Image im=getImageView();
                 can2.setVisible(true);
-                can2.setHeight(im.getHeight());
-                can2.setWidth(im.getWidth());
+                can2.setHeight(300);
+                can2.setWidth(300);
                 gContext=can2.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 0, 0);
@@ -135,7 +135,7 @@ public class LoadProject extends Application{
                 if(x%100==0 && y%100==0){
                     WritableImage wim=new WritableImage(100, 100);
                     SnapshotParameters snp=new SnapshotParameters();
-                    Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
+                    Rectangle2D rec=new Rectangle2D(x+30, y, 100, 100);
                     snp.setViewport(rec);
                     imv.setImage(can1.snapshot(snp, wim));
                 }else{
@@ -145,11 +145,13 @@ public class LoadProject extends Application{
                     x=x-tempx;
                     y=y-tempy;
                     
+                    System.out.println(x+" "+y);
+                    
                     System.out.println("("+x+","+y+")");
                     
                     WritableImage wim=new WritableImage(100, 100);
                     SnapshotParameters snp=new SnapshotParameters();
-                    Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
+                    Rectangle2D rec=new Rectangle2D(x+123.09, y+0.2, 100, 100);
                     snp.setViewport(rec);
                     imv.setImage(can1.snapshot(snp, wim));
                 }
@@ -260,10 +262,14 @@ public class LoadProject extends Application{
     }
     
     public void initCom(GraphicsContext gc){
+        //define el tamaño por defecto que tendrá el segundo canvas
         this.can2.setHeight(300);
         this.can2.setWidth(300);
+        //le doy al graphicContext los datos o medidas del canvas
         gc=this.can2.getGraphicsContext2D();
+        //define un rectangulo del tamaño del canvas en el canvas
         gc.fillRect(0, 0, this.can2.getWidth(), can2.getHeight());
+        //
         gc.strokeLine(0, 100, this.can2.getWidth(), 100);
         gc.setFill(Color.WHITE);
         gc.setLineWidth(1);
