@@ -13,23 +13,27 @@ import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundPosition;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javax.imageio.ImageIO;
@@ -42,73 +46,163 @@ public class LoadProject extends Application{
     
     HBox hbox;
     VBox vbox;
-    GridPane gridP, gridP1;
-    Button btnSearch, btnLoad;
-    ImageView myImage, myImage2;
-    BackgroundImage back;
-    Background b;
+    Button btnSearch, btnLoad, saveProject;
+    ImageView myImage; 
+    ImageView myImage2;
+    ImageView imv=new ImageView();
+    
+    GraphicsContext gContext;
+    Canvas can1, can2;
     
     @Override
     public void start(Stage stage) throws Exception {
+        //instancio canvas
+        can1=new Canvas();
+        can2=new Canvas();
+        initCom(gContext);
+        
         //instancio el hbox y el vbox y les doy el espacio entre cada child
         hbox=new HBox(10);
         vbox=new VBox(10);
         
-        //instancio los gridpane
-        gridP=new GridPane();
-        gridP1=new GridPane();
-        
         //instancio los botones
-        btnSearch=new Button("Search Project");
         btnLoad=new Button("Load Image");
+        btnSearch=new Button("Search Project");
+        saveProject=new Button("Save Project");
+        btnLoad.setPrefSize(btnSearch.getWidth(), btnSearch.getWidth());
+        saveProject.setPrefSize(btnSearch.getWidth(), btnSearch.getWidth());
         
         //instancio los image view
         myImage=new ImageView();
         myImage2=new ImageView();
         
         //declaro las acciones de cada boton
-        btnSearch.setOnAction(btnLoadEventListener);
-        btnLoad.setOnAction(btnLoad2EventListener);
+        btnLoad.setOnAction(new EventHandler<ActionEvent>(){
+
+            @Override
+            public void handle(ActionEvent t) {
+                //cargo la imagen
+                Image im=getImageView();
+                can1.setVisible(true);
+                can1.setHeight(im.getHeight());
+                can1.setWidth(im.getWidth());
+                gContext=can1.getGraphicsContext2D();
+                gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
+                gContext.drawImage(im, 1, 1);
+                for(int i=0; i<im.getHeight(); i=i+100){
+                    gContext.strokeLine(100+i, 0, 100+i, im.getHeight());
+                }
+                for(int i=0; i<im.getWidth(); i=i+100){
+                    gContext.strokeLine(0, 100+i, im.getWidth(), 100+i);
+                }
+                gContext.setLineWidth(1);
+                gContext.fill();
+                
+            }
+        });
+        btnSearch.setOnAction(new EventHandler<ActionEvent>(){
+
+            @Override
+            public void handle(ActionEvent t) {
+                //cargo la imagen
+                Image im=getImageView();
+                can2.setVisible(true);
+                can2.setHeight(im.getHeight());
+                can2.setWidth(im.getWidth());
+                gContext=can2.getGraphicsContext2D();
+                gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
+                gContext.drawImage(im, 0, 0);
+                for(int i=0; i<im.getHeight(); i=i+100){
+                    gContext.strokeLine(100+i, 0, 100+i, im.getHeight());
+                }
+                for(int i=0; i<im.getWidth(); i=i+100){
+                    gContext.strokeLine(0, 100+i, im.getWidth(), 100+i);
+                }
+                gContext.setLineWidth(1);
+                gContext.fill();
+                
+            }
+        });
         
-        //instancio el scene y lo agrego al stage
-        Scene scene=new Scene(hbox, 600, 600);
-        stage.setScene(scene);
-        stage.setTitle("Load Project");
+        //acción del canvas de imagen
+        can1.setOnMouseClicked(new EventHandler<MouseEvent>(){
+
+            @Override
+            public void handle(MouseEvent t) {
+                int x=(int)t.getX();
+                int y=(int)t.getY();
+                
+                if(x%100==0 && y%100==0){
+                    WritableImage wim=new WritableImage(100, 100);
+                    SnapshotParameters snp=new SnapshotParameters();
+                    Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
+                    snp.setViewport(rec);
+                    imv.setImage(can1.snapshot(snp, wim));
+                }else{
+                    int tempx=x%100;
+                    int tempy=y%100;
+                    
+                    x=x-tempx;
+                    y=y-tempy;
+                    
+                    System.out.println("("+x+","+y+")");
+                    
+                    WritableImage wim=new WritableImage(100, 100);
+                    SnapshotParameters snp=new SnapshotParameters();
+                    Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
+                    snp.setViewport(rec);
+                    imv.setImage(can1.snapshot(snp, wim));
+                }
+                
+            }
+        });
         
-        //agrego los botones al vbox
-        vbox.getChildren().addAll(btnSearch, btnLoad);
-        vbox.setVisible(true);
+        can2.setOnMouseClicked(new EventHandler<MouseEvent>(){
+
+            @Override
+            public void handle(MouseEvent t) {
+                int x=(int)t.getX();
+                int y=(int)t.getY();
+                int tempx=0;
+                int tempy=0;
+                
+                if(x%100==0 && y%100==0){
+                    gContext= can2.getGraphicsContext2D();
+                    gContext.drawImage(imv.getImage(), x, y);
+                }else{
+                    tempx=x%100;
+                    tempy=y%100;
+                    
+                    x=x-tempx;
+                    y=y-tempy;
+                    
+                    gContext= can2.getGraphicsContext2D();
+                    gContext.drawImage(imv.getImage(), x, y);
+                }
+                
+            }
+        });
         
-        //agrego todo al hbox
-        hbox.getChildren().addAll(vbox, gridP, gridP1);
+        vbox.getChildren().addAll(btnLoad, btnSearch, saveProject);
+        
+        hbox.getChildren().addAll(vbox, can1, can2);
         hbox.setVisible(true);
         
-        
-        //Definición del primer gridpane
-//        gridP.setPadding(new Insets(10, 10, 10, 10));
-//        gridP1.setPadding(new Insets(10, 10, 10, 10));
-//        gridP.setPrefSize(50, 200);
-//        gridP.setAlignment(Pos.TOP_LEFT);
-//        gridP.setBackground(b);
-//        gridP.setVisible(true);
-        GridPane.setConstraints(myImage, 0, 0);
-        gridP.getChildren().add(myImage);
-        
-        GridPane.setConstraints(myImage2, 1, 0);
-        gridP1.getChildren().add(myImage2);
-        gridP1.setStyle("-fx-grid-lines-visible: true");
+        //instancio el scene y lo agrego al stage
+        Scene scene=new Scene(hbox, 1000, 650);
+        stage.setScene(scene);
+        stage.setTitle("Load Project");
     }
     
     EventHandler<ActionEvent> btnLoadEventListener = new EventHandler<ActionEvent>(){
 
         @Override
         public void handle(ActionEvent t) {
-    
-            getImageView();
+            //getImageView();
         }
     };
     
-    private ImageView getImageView(){
+    private Image getImageView(){
         FileChooser fileChooser = new FileChooser();
             
             //Set extension filter
@@ -126,12 +220,10 @@ public class LoadProject extends Application{
                 Image image = SwingFXUtils.toFXImage(bufferedImage, null);
                 
                 myImage.setImage(image);
-                back=new BackgroundImage(myImage.getImage(), BackgroundRepeat.SPACE, BackgroundRepeat.SPACE, BackgroundPosition.CENTER, BackgroundSize.DEFAULT);
-                b=new Background(back);
             } catch (IOException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
-            return myImage;
+            return myImage.getImage();
     }
     
     EventHandler<ActionEvent> btnLoad2EventListener = new EventHandler<ActionEvent>(){
@@ -161,11 +253,20 @@ public class LoadProject extends Application{
                 Image image = SwingFXUtils.toFXImage(bufferedImage, null);
                 
                 myImage2.setImage(image);
-                back=new BackgroundImage(myImage.getImage(), BackgroundRepeat.SPACE, BackgroundRepeat.SPACE, BackgroundPosition.CENTER, BackgroundSize.DEFAULT);
-                b=new Background(back);
             } catch (IOException ex) {
                 Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
             }
             return myImage2;
+    }
+    
+    public void initCom(GraphicsContext gc){
+        this.can2.setHeight(300);
+        this.can2.setWidth(300);
+        gc=this.can2.getGraphicsContext2D();
+        gc.fillRect(0, 0, this.can2.getWidth(), can2.getHeight());
+        gc.strokeLine(0, 100, this.can2.getWidth(), 100);
+        gc.setFill(Color.WHITE);
+        gc.setLineWidth(1);
+        this.can2.setVisible(true);
     }
 }
