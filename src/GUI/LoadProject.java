@@ -61,6 +61,7 @@ public class LoadProject extends Application{
         can2=new Canvas();
         initCom(gContext);
         
+        
         //instancio el hbox y el vbox y les doy el espacio entre cada child
         hbox=new HBox(10);
         vbox=new VBox(10);
@@ -258,8 +259,7 @@ public class LoadProject extends Application{
             }
             return myImage2;
     }
-    
-    public void initCom(GraphicsContext gc){
+     public void initCom(GraphicsContext gc){
         this.can2.setHeight(300);
         this.can2.setWidth(300);
         gc=this.can2.getGraphicsContext2D();
@@ -268,5 +268,5 @@ public class LoadProject extends Application{
         gc.setFill(Color.WHITE);
         gc.setLineWidth(1);
         this.can2.setVisible(true);
-    }
+}
 }

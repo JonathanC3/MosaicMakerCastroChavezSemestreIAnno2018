@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 package data;
-import domain.ImageObject;
+import domain.Mosaic;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  *
- * @author root
+ * @author jonathan
  */
 public class ProjectData {
     private String path;
@@ -25,14 +25,14 @@ public class ProjectData {
         this.path = "Proyects.dat";
     }
     
-    public void saveProyect(ImageObject project) throws IOException, ClassNotFoundException{
+    public void saveProyect(Mosaic project) throws IOException, ClassNotFoundException{
         File file= new File(this.path);
-        List<ImageObject> objetoList= new ArrayList<ImageObject>();
+        List<Mosaic> objetoList= new ArrayList<Mosaic>();
         
         if(file.exists()){
             ObjectInputStream objectInputStream= new ObjectInputStream(new FileInputStream(file));
             Object aux= objectInputStream.readObject();
-            objetoList=(List<ImageObject>) aux;
+            objetoList=(List<domain.Mosaic>) aux;
             objectInputStream.close();
         }
         
@@ -42,16 +42,16 @@ public class ProjectData {
         output.close();
     }
     
-     public ArrayList<ImageObject> loadProyect() throws IOException, ClassNotFoundException{
+     public ArrayList<Mosaic> loadProyect() throws IOException, ClassNotFoundException{
         File myFile =new File(this.path);
-        ArrayList<ImageObject> objetoList= new ArrayList<ImageObject>();
+        ArrayList<Mosaic> objetoList= new ArrayList<Mosaic>();
         if(myFile.exists()){
             ObjectInputStream ObjectinputStream=new ObjectInputStream(new FileInputStream(myFile));
             Object aux= ObjectinputStream.readObject();
-            objetoList=(ArrayList<ImageObject>) aux;
+            objetoList=(ArrayList<domain.Mosaic>) aux;
             ObjectinputStream.close();
         }//If       
            
         return objetoList;
-    }//obteneObjeto
+    }//obtieneObjeto
 }
