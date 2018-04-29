@@ -6,19 +6,23 @@
 package mosaicmakercastrochavezsemestreianno2018;
 
 import GUI.MainWindow;
+
 import javafx.application.Application;
+import static javafx.application.Application.STYLESHEET_CASPIAN;
+import static javafx.application.Application.setUserAgentStylesheet;
+import javafx.stage.Stage;
 
 
 /**
  *
  * @author jonathan
  */
-public class MosaicMakerCastroChavezSemestreIAnno2018 {
-    /**
-     * @param args the command line arguments
-     */
+public class MosaicMakerCastroChavezSemestreIAnno2018  {
+    
+
+    
     public static void main(String[] args) {
-        Application.launch(MainWindow.class, args);
+        Application.launch(MainWindow.class);
     }
     
 }

@@ -274,5 +274,5 @@ public class LoadProject extends Application{
         gc.setFill(Color.WHITE);
         gc.setLineWidth(1);
         this.can2.setVisible(true);
-    }
+}
 }
