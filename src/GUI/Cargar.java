@@ -52,8 +52,8 @@ public class Cargar extends Application {
     HBox hbox;
     VBox vbox, vb;
     Button btnSet, btnLoad, btnSave;
-    TextField tfdNombre, tfdPixel;
-    Label lblName, lblPixel, lblImage, lblMosaic;
+    TextField tfdNombre, tfdPixel, tfdSize;
+    Label lblName, lblPixel, lblSize, lblImage, lblMosaic;
     ImageView myImage; 
     ImageView myImage2;
     ImageView imv=new ImageView();
@@ -90,9 +90,11 @@ public class Cargar extends Application {
         lblPixel=new Label(" PixelSize");
         lblImage=new Label( "Image");
         lblMosaic=new Label( "Mosaic");
+        lblSize=new Label(" Size of square");
         
         tfdNombre=new TextField();
         tfdPixel=new TextField();
+        tfdSize=new TextField();
         
         //instancio los image view
         myImage=new ImageView();
@@ -108,22 +110,23 @@ public class Cargar extends Application {
                 int x=(int)im.getWidth()-((int)im.getWidth()%100);
                 int y=(int)im.getHeight()-((int)im.getWidth()%100);
                 //dibujo canvas 1
+                size=Integer.parseInt(tfdSize.getText());
                 can1.setVisible(true);
                 can1.setHeight(y);
                 can1.setWidth(x);
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
-                for(int i=0; i<im.getHeight(); i=i+100){
-                    gContext.strokeLine(100+i, 0, 100+i, im.getHeight());
+                for(int i=0; i<im.getHeight(); i=i+size){
+                    gContext.strokeLine(size+i, 0, size+i, im.getHeight());
                 }
-                for(int i=0; i<im.getWidth(); i=i+100){
-                    gContext.strokeLine(0, 100+i, im.getWidth(), 100+i);
+                for(int i=0; i<im.getWidth(); i=i+size){
+                    gContext.strokeLine(0, size+i, im.getWidth(), size+i);
                 }
                 gContext.setLineWidth(1);
                 gContext.fill();
                 
-                initCom(gContext2, pixels);
+                
             }
         });
         btnSet.setOnAction(new EventHandler<ActionEvent>(){
@@ -139,6 +142,8 @@ public class Cargar extends Application {
                     System.out.println("Enter a valid name");
                     tfdNombre.setText("");
                     tfdPixel.setText("");
+                    btnLoad.setDisable(true);
+                    btnSave.setDisable(true);
                 }else{
                     try{
                         //validamos que sea un numero
@@ -154,7 +159,10 @@ public class Cargar extends Application {
                         tfdPixel.setText("");
                         System.out.println(e);
                     }
+                
                 }
+            initCom(gContext2, pixels);
+            btnSet.setDisable(false);
             }
         });
         
@@ -166,22 +174,22 @@ public class Cargar extends Application {
                 int x=(int)t.getX();
                 int y=(int)t.getY();
                 
-                if(x%100==0 && y%100==0){
+                if(x%size==0 && y%size==0){
                     WritableImage wim=new WritableImage(100, 100);
                     SnapshotParameters snp=new SnapshotParameters();
-                    Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
+                    Rectangle2D rec=new Rectangle2D(x, y, size, size);
                     snp.setViewport(rec);
                     imv.setImage(can1.snapshot(snp, wim));
                 }else{
-                    int tempx=x%100;
-                    int tempy=y%100;
+                    int tempx=x%size;
+                    int tempy=y%size;
                     
                     x=x-tempx;
                     y=y-tempy;
                     
                     System.out.println("("+x+","+y+")");
                     
-                    WritableImage wim=new WritableImage(100, 100);
+                    WritableImage wim=new WritableImage(size, size);
                     SnapshotParameters snp=new SnapshotParameters();
                     Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
                     snp.setViewport(rec);
@@ -200,12 +208,12 @@ public class Cargar extends Application {
                 int tempx=0;
                 int tempy=0;
                 
-                if(x%100==0 && y%100==0){
+                if(x%size==0 && y%size==0){
                     gContext= can2.getGraphicsContext2D();
                     gContext.drawImage(imv.getImage(), x, y);
                 }else{
-                    tempx=x%100;
-                    tempy=y%100;
+                    tempx=x%size;
+                    tempy=y%size;
                     
                     x=x-tempx;
                     y=y-tempy;
@@ -217,8 +225,8 @@ public class Cargar extends Application {
             }
         });
         
-        vbox.getChildren().addAll(lblName, tfdNombre,lblPixel, tfdPixel,btnLoad, btnSet, btnSave);
-        vb.getChildren().addAll(lblImage, sp1, lblMosaic,  sp2);
+        vbox.getChildren().addAll(lblName, tfdNombre,lblPixel, tfdPixel, lblSize, tfdSize, btnLoad, btnSet);
+        vb.getChildren().addAll(lblImage, sp1, lblMosaic,  sp2, btnSave);
         hbox.getChildren().addAll(vbox, vb);
         hbox.setVisible(true);
         
