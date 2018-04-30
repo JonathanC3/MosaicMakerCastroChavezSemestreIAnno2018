@@ -5,6 +5,8 @@
  */
 package GUI;
 
+import data.MosaicFile;
+import domain.Mosaic;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +41,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.converter.LongStringConverter;
 import javax.imageio.ImageIO;
 
 /**
@@ -55,18 +58,21 @@ public class Cargar extends Application {
     ImageView myImage2;
     ImageView imv=new ImageView();
     ScrollPane sp;
-    GraphicsContext gContext;
+    GraphicsContext gContext, gContext2;
     Canvas can1, can2;
     private int size;
     private int pix;
+    MosaicFile mFile;
+    Mosaic mosaic;
+    Long pixels;
     
     
     @Override
     public void start(Stage stage) throws Exception {
         //instancio canvas
+        mosaic=new Mosaic();
         can1=new Canvas();
         can2=new Canvas();
-        initCom(gContext);
         
         sp=new ScrollPane();
         //instancio el hbox y el vbox y les doy el espacio entre cada child
@@ -75,8 +81,10 @@ public class Cargar extends Application {
         
         //instancio los botones
         btnLoad=new Button(" Load Image");
+        btnLoad.setDisable(true);
         btnSet=new Button(" Set data");
         btnSave=new Button(" Save Project");
+        btnSave.setDisable(true);
         lblNombre=new Label(" Project Name");
         lblPixel=new Label(" PixelSize");
         tfdNombre=new TextField();
@@ -93,9 +101,10 @@ public class Cargar extends Application {
             public void handle(ActionEvent t) {
                 //cargo la imagen
                 Image im=getImageView();
+                //dibujo canvas 1
                 can1.setVisible(true);
-                can1.setHeight(im.getHeight());
-                can1.setWidth(im.getWidth());
+                can1.setHeight(pixels);
+                can1.setWidth(pixels);
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
@@ -108,17 +117,37 @@ public class Cargar extends Application {
                 gContext.setLineWidth(1);
                 gContext.fill();
                 
+                initCom(gContext2, pixels);
             }
         });
         btnSet.setOnAction(new EventHandler<ActionEvent>(){
 
             @Override
             public void handle(ActionEvent t) {
-                try{
-                    String nombre=tfdNombre.getText();
-                    int pixels= Integer.parseInt(tfdPixel.getText());
-                }catch(Exception e){
-                
+                btnLoad.setDisable(false);
+                btnSave.setDisable(false);
+                String name=tfdNombre.getText();
+                String pix=tfdPixel.getText();
+                if(name.equals("")){
+                    //validamos que no esté vacío
+                    System.out.println("Enter a valid name");
+                    tfdNombre.setText("");
+                    tfdPixel.setText("");
+                }else{
+                    try{
+                        //validamos que sea un numero
+                        pixels=Long.parseLong(pix);
+                        
+                        mosaic.setName(name);
+                        mosaic.setPixels(pixels);
+                        File file=new File("./"+name+".dat");
+                        mFile=new MosaicFile(file);
+                        mFile.addEndRecord(mosaic);
+                    }catch(Exception e){
+                        tfdNombre.setText("");
+                        tfdPixel.setText("");
+                        System.out.println(e);
+                    }
                 }
             }
         });
@@ -215,15 +244,20 @@ public class Cargar extends Application {
             }
             return myImage.getImage();
     }
-    public void initCom(GraphicsContext gc){
-        this.can2.setHeight(300);
-        this.can2.setWidth(300);
+    public void initCom(GraphicsContext gc, long pix){
+        this.can2.setHeight(pix);
+        this.can2.setWidth(pix);
         gc=this.can2.getGraphicsContext2D();
-        gc.fillRect(0, 0, this.can2.getWidth(), can2.getHeight());
-        gc.strokeLine(0, 100, this.can2.getWidth(), 100);
-        gc.setFill(Color.WHITE);
+        gc.fillRect(0, 0, pix, pix);
+        
+        for(int i=0; i<pix; i=i+100){
+            gc.strokeLine(100+i, 0, 100+i, pix);
+        }
+        for(int i=0; i<pix; i=i+100){
+            gc.strokeLine(0, 100+i, pix, 100+i);
+        }
         gc.setLineWidth(1);
-        this.can2.setVisible(true);
+        gc.fill();
     }
 
    private ScrollPane getScrollPane(Canvas c1){

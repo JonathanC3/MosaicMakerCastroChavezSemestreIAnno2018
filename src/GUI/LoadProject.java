@@ -5,6 +5,8 @@
  */
 package GUI;
 
+import data.MosaicFile;
+import domain.Mosaic;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +25,9 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
@@ -50,6 +54,10 @@ public class LoadProject extends Application{
     ImageView myImage; 
     ImageView myImage2;
     ImageView imv=new ImageView();
+    Label lbl=new Label("Write the project name to search");
+    TextField txtName=new TextField();
+    MosaicFile mosaicFile;
+    Mosaic mosaic;
     
     GraphicsContext gContext;
     Canvas can1, can2;
@@ -59,7 +67,7 @@ public class LoadProject extends Application{
         //instancio canvas
         can1=new Canvas();
         can2=new Canvas();
-        initCom(gContext);
+//        initCom(gContext);
         
         //instancio el hbox y el vbox y les doy el espacio entre cada child
         hbox=new HBox(10);
@@ -69,8 +77,6 @@ public class LoadProject extends Application{
         btnLoad=new Button("Load Image");
         btnSearch=new Button("Search Project");
         saveProject=new Button("Save Project");
-        btnLoad.setPrefWidth(btnSearch.getWidth());
-        saveProject.setPrefWidth(btnSearch.getWidth());
         
         //instancio los image view
         myImage=new ImageView();
@@ -84,8 +90,8 @@ public class LoadProject extends Application{
                 //cargo la imagen
                 Image im=getImageView();
                 can1.setVisible(true);
-                can1.setHeight(300);
-                can1.setWidth(300);
+                can1.setHeight(im.getHeight());
+                can1.setWidth(im.getWidth());
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
@@ -121,6 +127,25 @@ public class LoadProject extends Application{
                 gContext.setLineWidth(1);
                 gContext.fill();
                 
+            }
+        });
+        
+        saveProject.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent t) {
+                try {
+                    String name=txtName.getText();
+                    //valido que el nombre no sea vacío
+//                while(name.equals("")){
+//                }
+                    String path="./"+name+".dat";
+                    File mosaicF=new File(path);
+                    mosaicFile=new MosaicFile(mosaicF);
+                    mosaic=mosaicFile.getMosaic(0);
+                } catch (IOException ex) {
+                    Logger.getLogger(LoadProject.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         
@@ -185,7 +210,7 @@ public class LoadProject extends Application{
             }
         });
         
-        vbox.getChildren().addAll(btnLoad, btnSearch, saveProject);
+        vbox.getChildren().addAll(btnLoad, btnSearch, saveProject, lbl, txtName);
         
         hbox.getChildren().addAll(vbox, can1, can2);
         hbox.setVisible(true);
@@ -261,18 +286,18 @@ public class LoadProject extends Application{
             return myImage2;
     }
     
-    public void initCom(GraphicsContext gc){
-        //define el tamaño por defecto que tendrá el segundo canvas
-        this.can2.setHeight(300);
-        this.can2.setWidth(300);
-        //le doy al graphicContext los datos o medidas del canvas
-        gc=this.can2.getGraphicsContext2D();
-        //define un rectangulo del tamaño del canvas en el canvas
-        gc.fillRect(0, 0, this.can2.getWidth(), can2.getHeight());
-        //
-        gc.strokeLine(0, 100, this.can2.getWidth(), 100);
-        gc.setFill(Color.WHITE);
-        gc.setLineWidth(1);
-        this.can2.setVisible(true);
-}
+//    public void initCom(GraphicsContext gc){
+//        //define el tamaño por defecto que tendrá el segundo canvas
+//        this.can2.setHeight(300);
+//        this.can2.setWidth(300);
+//        //le doy al graphicContext los datos o medidas del canvas
+//        gc=this.can2.getGraphicsContext2D();
+//        //define un rectangulo del tamaño del canvas en el canvas
+//        gc.fillRect(0, 0, this.can2.getWidth(), can2.getHeight());
+//        //
+//        gc.strokeLine(0, 100, this.can2.getWidth(), 100);
+//        gc.setFill(Color.WHITE);
+//        gc.setLineWidth(1);
+//        this.can2.setVisible(true);
+//    }
 }
