@@ -78,7 +78,7 @@ public class MosaicFile {
         return success;
     }
     
-    //obtener un estudiante
+    //obtener un Mosaico
     public Mosaic getMosaic(int position) throws IOException{
         //validar la posici'on
         if(position >= 0 && position <= this.regsQuantity){

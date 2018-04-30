@@ -50,14 +50,14 @@ import javax.imageio.ImageIO;
 public class Cargar extends Application {
     
     HBox hbox;
-    VBox vbox;
+    VBox vbox, vb;
     Button btnSet, btnLoad, btnSave;
     TextField tfdNombre, tfdPixel;
-    Label lblNombre, lblPixel;
+    Label lblName, lblPixel, lblImage, lblMosaic;
     ImageView myImage; 
     ImageView myImage2;
     ImageView imv=new ImageView();
-    ScrollPane sp;
+    ScrollPane sp1, sp2;
     GraphicsContext gContext, gContext2;
     Canvas can1, can2;
     private int size;
@@ -74,19 +74,23 @@ public class Cargar extends Application {
         can1=new Canvas();
         can2=new Canvas();
         
-        sp=new ScrollPane();
+        sp1=getScrollPane(can1);
+        sp2=getScrollPane(can2);
         //instancio el hbox y el vbox y les doy el espacio entre cada child
         hbox=new HBox(10);
         vbox=new VBox(3);
-        
+        vb=new VBox(3);
         //instancio los botones
         btnLoad=new Button(" Load Image");
         btnLoad.setDisable(true);
         btnSet=new Button(" Set data");
         btnSave=new Button(" Save Project");
         btnSave.setDisable(true);
-        lblNombre=new Label(" Project Name");
+        lblName=new Label(" Project Name");
         lblPixel=new Label(" PixelSize");
+        lblImage=new Label( "Image");
+        lblMosaic=new Label( "Mosaic");
+        
         tfdNombre=new TextField();
         tfdPixel=new TextField();
         
@@ -101,10 +105,12 @@ public class Cargar extends Application {
             public void handle(ActionEvent t) {
                 //cargo la imagen
                 Image im=getImageView();
+                int x=(int)im.getWidth()-((int)im.getWidth()%100);
+                int y=(int)im.getHeight()-((int)im.getWidth()%100);
                 //dibujo canvas 1
                 can1.setVisible(true);
-                can1.setHeight(pixels);
-                can1.setWidth(pixels);
+                can1.setHeight(y);
+                can1.setWidth(x);
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
@@ -211,15 +217,15 @@ public class Cargar extends Application {
             }
         });
         
-        vbox.getChildren().addAll(lblNombre, tfdNombre,lblPixel, tfdPixel,btnLoad, btnSet, btnSave);
-        
-        hbox.getChildren().addAll(vbox, can1, can2);
+        vbox.getChildren().addAll(lblName, tfdNombre,lblPixel, tfdPixel,btnLoad, btnSet, btnSave);
+        vb.getChildren().addAll(lblImage, sp1, lblMosaic,  sp2);
+        hbox.getChildren().addAll(vbox, vb);
         hbox.setVisible(true);
         
         //instancio el scene y lo agrego al stage
         Scene scene=new Scene(hbox, 1000, 650);
         stage.setScene(scene);
-        stage.setTitle("Load Project");
+        stage.setTitle("New Project");
     }
     private Image getImageView(){
         FileChooser fileChooser = new FileChooser();
@@ -261,7 +267,7 @@ public class Cargar extends Application {
     }
 
    private ScrollPane getScrollPane(Canvas c1){
-       
+       ScrollPane sp=new ScrollPane();
        sp.setPrefSize(300, 250);
        sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
