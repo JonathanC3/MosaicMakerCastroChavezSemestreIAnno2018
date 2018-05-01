@@ -8,6 +8,7 @@ package GUI;
 import data.MosaicFile;
 import domain.Mosaic;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -41,6 +42,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.converter.LongStringConverter;
 import javax.imageio.ImageIO;
 
@@ -54,6 +56,7 @@ public class Cargar extends Application {
     Button btnSet, btnLoad, btnSave;
     TextField tfdNombre, tfdPixel;
     Label lblNombre, lblPixel;
+    Image im;
     ImageView myImage; 
     ImageView myImage2;
     ImageView imv=new ImageView();
@@ -100,11 +103,11 @@ public class Cargar extends Application {
             @Override
             public void handle(ActionEvent t) {
                 //cargo la imagen
-                Image im=getImageView();
+                im=getImageView();
                 //dibujo canvas 1
                 can1.setVisible(true);
-                can1.setHeight(pixels);
-                can1.setWidth(pixels);
+                can1.setHeight(im.getHeight());
+                can1.setWidth(im.getWidth());
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
@@ -117,7 +120,7 @@ public class Cargar extends Application {
                 gContext.setLineWidth(1);
                 gContext.fill();
                 
-                initCom(gContext2, pixels);
+                
             }
         });
         btnSet.setOnAction(new EventHandler<ActionEvent>(){
@@ -149,6 +152,36 @@ public class Cargar extends Application {
                         System.out.println(e);
                     }
                 }
+                initCom(gContext2, pixels);
+                btnSet.setDisable(true);
+            }
+        });
+        
+        btnSave.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent t) {
+                //declaro un nuevo Graphics Context
+                GraphicsContext gpc=can2.getGraphicsContext2D();
+                //Declaro un nuevo ImageView
+                ImageView img=new ImageView();
+                
+                //Recorto la imagen
+                WritableImage wri=new WritableImage((int)can2.getWidth(), (int)can2.getHeight());
+                img.setImage(can2.snapshot(null, wri));
+                
+                //le doy la ruta de guardado a la imagen
+                FileChooser fch=new FileChooser();
+                File f= fch.showSaveDialog(null);
+                //renderizo la imagen
+                BufferedImage bf= SwingFXUtils.fromFXImage(img.getImage(), null);
+                
+                try {
+                    //Guardo la imagen
+                    ImageIO.write(bf, "png", f);
+                } catch (IOException ex) {
+                    Logger.getLogger(Cargar.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         
@@ -160,28 +193,52 @@ public class Cargar extends Application {
                 int x=(int)t.getX();
                 int y=(int)t.getY();
                 
-                if(x%100==0 && y%100==0){
-                    WritableImage wim=new WritableImage(100, 100);
-                    SnapshotParameters snp=new SnapshotParameters();
-                    Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
-                    snp.setViewport(rec);
-                    imv.setImage(can1.snapshot(snp, wim));
+                //al recortar produce el error de no seleccionar correctamente las cordenadas (x,y)
+                if(im.getHeight()<can2.getHeight()){
+                    if(x%100==0 && y%100==0){
+                        WritableImage wim=new WritableImage(100, 100);
+                        SnapshotParameters snp=new SnapshotParameters();
+                        Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
+                        snp.setViewport(rec);
+                        imv.setImage(can1.snapshot(snp, wim));
+                    }else{
+                        int tempx=x%100;
+                        int tempy=y%100;
+
+                        x=x-tempx;
+                        y=y-tempy;
+
+                        System.out.println("("+x+","+y+")");
+
+                        WritableImage wim=new WritableImage(100, 100);
+                        SnapshotParameters snp=new SnapshotParameters();
+                        Rectangle2D rec=new Rectangle2D(x+181, y+0.2, 100, 100);
+                        snp.setViewport(rec);
+                        imv.setImage(can1.snapshot(snp, wim));
+                    }
                 }else{
-                    int tempx=x%100;
-                    int tempy=y%100;
-                    
-                    x=x-tempx;
-                    y=y-tempy;
-                    
-                    System.out.println("("+x+","+y+")");
-                    
-                    WritableImage wim=new WritableImage(100, 100);
-                    SnapshotParameters snp=new SnapshotParameters();
-                    Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
-                    snp.setViewport(rec);
-                    imv.setImage(can1.snapshot(snp, wim));
+                    if(x%100==0 && y%100==0){
+                        WritableImage wim=new WritableImage(100, 100);
+                        SnapshotParameters snp=new SnapshotParameters();
+                        Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
+                        snp.setViewport(rec);
+                        imv.setImage(can1.snapshot(snp, wim));
+                    }else{
+                        int tempx=x%100;
+                        int tempy=y%100;
+
+                        x=x-tempx;
+                        y=y-tempy;
+
+                        System.out.println("Say Hi");
+
+                        WritableImage wim=new WritableImage(100, 100);
+                        SnapshotParameters snp=new SnapshotParameters();
+                        Rectangle2D rec=new Rectangle2D(x+181, y+0.2, 100, 100);
+                        snp.setViewport(rec);
+                        imv.setImage(can1.snapshot(snp, wim));
+                    }
                 }
-                
             }
         });
         
