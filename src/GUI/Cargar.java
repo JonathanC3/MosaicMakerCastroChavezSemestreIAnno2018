@@ -8,6 +8,7 @@ package GUI;
 import data.MosaicFile;
 import domain.Mosaic;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -32,6 +33,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -41,6 +43,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.converter.LongStringConverter;
 import javax.imageio.ImageIO;
 
@@ -50,22 +53,23 @@ import javax.imageio.ImageIO;
 public class Cargar extends Application {
     
     HBox hbox;
-    VBox vbox, vb;
-    Button btnSet, btnLoad, btnSave;
-    TextField tfdNombre, tfdPixel, tfdSize;
-    Label lblName, lblPixel, lblSize, lblImage, lblMosaic;
+    VBox vbox;
+    Button btnSet, btnLoad, btnSave, btnRotate;
+    TextField tfdNombre, tfdPixel;
+    Label lblNombre, lblPixel;
+    Image im;
     ImageView myImage; 
     ImageView myImage2;
     ImageView imv=new ImageView();
-    ScrollPane sp1, sp2;
+    ScrollPane sp;
     GraphicsContext gContext, gContext2;
     Canvas can1, can2;
-    private int size;
+    private int size, rot;
     private int pix;
     MosaicFile mFile;
     Mosaic mosaic;
     Long pixels;
-    
+    String name;
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -74,27 +78,25 @@ public class Cargar extends Application {
         can1=new Canvas();
         can2=new Canvas();
         
-        sp1=getScrollPane(can1);
-        sp2=getScrollPane(can2);
+        sp=new ScrollPane();
         //instancio el hbox y el vbox y les doy el espacio entre cada child
         hbox=new HBox(10);
         vbox=new VBox(3);
-        vb=new VBox(3);
+        
+        rot=0;
+        
         //instancio los botones
+        btnRotate=new Button("Rotate images");
+        btnRotate.setDisable(true);
         btnLoad=new Button(" Load Image");
         btnLoad.setDisable(true);
         btnSet=new Button(" Set data");
         btnSave=new Button(" Save Project");
         btnSave.setDisable(true);
-        lblName=new Label(" Project Name");
+        lblNombre=new Label(" Project Name");
         lblPixel=new Label(" PixelSize");
-        lblImage=new Label( "Image");
-        lblMosaic=new Label( "Mosaic");
-        lblSize=new Label(" Size of square");
-        
         tfdNombre=new TextField();
         tfdPixel=new TextField();
-        tfdSize=new TextField();
         
         //instancio los image view
         myImage=new ImageView();
@@ -106,22 +108,19 @@ public class Cargar extends Application {
             @Override
             public void handle(ActionEvent t) {
                 //cargo la imagen
-                Image im=getImageView();
-                int x=(int)im.getWidth()-((int)im.getWidth()%100);
-                int y=(int)im.getHeight()-((int)im.getWidth()%100);
+                im=getImageView();
                 //dibujo canvas 1
-                size=Integer.parseInt(tfdSize.getText());
                 can1.setVisible(true);
-                can1.setHeight(y);
-                can1.setWidth(x);
+                can1.setHeight(im.getHeight()-(im.getHeight()%100));
+                can1.setWidth(im.getWidth()-(im.getWidth()%100));
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
-                for(int i=0; i<im.getHeight(); i=i+size){
-                    gContext.strokeLine(size+i, 0, size+i, im.getHeight());
+                for(int i=0; i<im.getHeight(); i=i+100){
+                    gContext.strokeLine(100+i, 0, 100+i, im.getHeight());
                 }
-                for(int i=0; i<im.getWidth(); i=i+size){
-                    gContext.strokeLine(0, size+i, im.getWidth(), size+i);
+                for(int i=0; i<im.getWidth(); i=i+100){
+                    gContext.strokeLine(0, 100+i, im.getWidth(), 100+i);
                 }
                 gContext.setLineWidth(1);
                 gContext.fill();
@@ -135,15 +134,14 @@ public class Cargar extends Application {
             public void handle(ActionEvent t) {
                 btnLoad.setDisable(false);
                 btnSave.setDisable(false);
-                String name=tfdNombre.getText();
+                btnRotate.setDisable(false);
+                name=tfdNombre.getText();
                 String pix=tfdPixel.getText();
                 if(name.equals("")){
                     //validamos que no esté vacío
                     System.out.println("Enter a valid name");
                     tfdNombre.setText("");
                     tfdPixel.setText("");
-                    btnLoad.setDisable(true);
-                    btnSave.setDisable(true);
                 }else{
                     try{
                         //validamos que sea un numero
@@ -154,15 +152,54 @@ public class Cargar extends Application {
                         File file=new File("./"+name+".dat");
                         mFile=new MosaicFile(file);
                         mFile.addEndRecord(mosaic);
+                        initCom(gContext2, pixels);
+                        btnSet.setDisable(true);
                     }catch(Exception e){
                         tfdNombre.setText("");
                         tfdPixel.setText("");
                         System.out.println(e);
                     }
-                
                 }
-            initCom(gContext2, pixels);
-            btnSet.setDisable(false);
+            }
+        });
+        
+        btnSave.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent t) {
+                //declaro un nuevo Graphics Context
+                GraphicsContext gpc=can2.getGraphicsContext2D();
+                //Declaro un nuevo ImageView
+                ImageView img=new ImageView();
+                
+                //Recorto la imagen
+                WritableImage wri=new WritableImage((int)can2.getWidth(), (int)can2.getHeight());
+                img.setImage(can2.snapshot(null, wri));
+                
+                //le doy la ruta de guardado a la imagen
+                FileChooser fch=new FileChooser();
+                File f= fch.showSaveDialog(null);
+                //renderizo la imagen
+                BufferedImage bf= SwingFXUtils.fromFXImage(img.getImage(), null);
+                
+                try {
+                    //Guardo la imagen
+                    ImageIO.write(bf, "png", f);
+                } catch (IOException ex) {
+                    Logger.getLogger(Cargar.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+        
+        btnRotate.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent t) {
+                if(rot==0){
+                    rot=1;
+                }else{
+                    rot=0;
+                }
             }
         });
         
@@ -173,29 +210,20 @@ public class Cargar extends Application {
             public void handle(MouseEvent t) {
                 int x=(int)t.getX();
                 int y=(int)t.getY();
+                int tempx=(x%100);
+                int tempy=(y%100);
                 
-                if(x%size==0 && y%size==0){
-                    WritableImage wim=new WritableImage(100, 100);
-                    SnapshotParameters snp=new SnapshotParameters();
-                    Rectangle2D rec=new Rectangle2D(x, y, size, size);
-                    snp.setViewport(rec);
-                    imv.setImage(can1.snapshot(snp, wim));
-                }else{
-                    int tempx=x%size;
-                    int tempy=y%size;
-                    
-                    x=x-tempx;
-                    y=y-tempy;
-                    
-                    System.out.println("("+x+","+y+")");
-                    
-                    WritableImage wim=new WritableImage(size, size);
-                    SnapshotParameters snp=new SnapshotParameters();
-                    Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
-                    snp.setViewport(rec);
-                    imv.setImage(can1.snapshot(snp, wim));
-                }
+                //redefino x, y
+                x=x-tempx;
+                y=y-tempy;
                 
+                System.out.println(x+", "+y);
+                
+                WritableImage wim=new WritableImage(100, 100);
+                SnapshotParameters snp=new SnapshotParameters();
+                Rectangle2D rec=new Rectangle2D(x+90, y+0.2, 100, 100);
+                snp.setViewport(rec);
+                imv.setImage(can1.snapshot(snp, wim));
             }
         });
         
@@ -208,12 +236,12 @@ public class Cargar extends Application {
                 int tempx=0;
                 int tempy=0;
                 
-                if(x%size==0 && y%size==0){
+                if(x%100==0 && y%100==0){
                     gContext= can2.getGraphicsContext2D();
                     gContext.drawImage(imv.getImage(), x, y);
                 }else{
-                    tempx=x%size;
-                    tempy=y%size;
+                    tempx=x%100;
+                    tempy=y%100;
                     
                     x=x-tempx;
                     y=y-tempy;
@@ -225,15 +253,32 @@ public class Cargar extends Application {
             }
         });
         
-        vbox.getChildren().addAll(lblName, tfdNombre,lblPixel, tfdPixel, lblSize, tfdSize, btnLoad, btnSet);
-        vb.getChildren().addAll(lblImage, sp1, lblMosaic,  sp2, btnSave);
-        hbox.getChildren().addAll(vbox, vb);
+        //probando como rotar
+        can2.setOnMousePressed(new EventHandler<MouseEvent>() {
+            
+            
+            @Override
+            public void handle(MouseEvent t) {
+                int xx=(int)t.getX();
+                int yy=(int)t.getY();
+                
+                xx=xx-(xx%100);
+                yy=yy-(yy%100); 
+                
+                System.out.println("Hi");
+            }
+        });
+        
+        vbox.setSpacing(10);
+        vbox.getChildren().addAll(lblNombre, tfdNombre,lblPixel, tfdPixel,btnLoad, btnSet, btnSave, btnRotate);
+        
+        hbox.getChildren().addAll(vbox, can1, can2);
         hbox.setVisible(true);
         
         //instancio el scene y lo agrego al stage
         Scene scene=new Scene(hbox, 1000, 650);
         stage.setScene(scene);
-        stage.setTitle("New Project");
+        stage.setTitle("Load Project");
     }
     private Image getImageView(){
         FileChooser fileChooser = new FileChooser();
@@ -275,7 +320,7 @@ public class Cargar extends Application {
     }
 
    private ScrollPane getScrollPane(Canvas c1){
-       ScrollPane sp=new ScrollPane();
+       
        sp.setPrefSize(300, 250);
        sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
