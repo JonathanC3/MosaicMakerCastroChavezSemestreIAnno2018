@@ -61,11 +61,10 @@ public class Cargar extends Application {
     ImageView myImage; 
     ImageView myImage2;
     ImageView imv=new ImageView();
-    ScrollPane sp;
+    ScrollPane sp1, sp2;
     GraphicsContext gContext, gContext2;
     Canvas can1, can2;
     private int size, rot;
-    private int pix;
     MosaicFile mFile;
     Mosaic mosaic;
     Long pixels;
@@ -78,13 +77,14 @@ public class Cargar extends Application {
         can1=new Canvas();
         can2=new Canvas();
         
-        sp=new ScrollPane();
+        
         //instancio el hbox y el vbox y les doy el espacio entre cada child
         hbox=new HBox(10);
         vbox=new VBox(3);
         
         rot=0;
-        
+        sp1=getScrollPane(can1);
+        sp2=getScrollPane(can2);
         //instancio los botones
         btnRotate=new Button("Rotate images");
         btnRotate.setDisable(true);
@@ -272,7 +272,7 @@ public class Cargar extends Application {
         vbox.setSpacing(10);
         vbox.getChildren().addAll(lblNombre, tfdNombre,lblPixel, tfdPixel,btnLoad, btnSet, btnSave, btnRotate);
         
-        hbox.getChildren().addAll(vbox, can1, can2);
+        hbox.getChildren().addAll(vbox, sp1, sp2);
         hbox.setVisible(true);
         
         //instancio el scene y lo agrego al stage
@@ -320,7 +320,7 @@ public class Cargar extends Application {
     }
 
    private ScrollPane getScrollPane(Canvas c1){
-       
+       ScrollPane sp=new ScrollPane();
        sp.setPrefSize(300, 250);
        sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
