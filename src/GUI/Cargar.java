@@ -33,6 +33,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -53,7 +54,7 @@ public class Cargar extends Application {
     
     HBox hbox;
     VBox vbox;
-    Button btnSet, btnLoad, btnSave;
+    Button btnSet, btnLoad, btnSave, btnRotate;
     TextField tfdNombre, tfdPixel;
     Label lblNombre, lblPixel;
     Image im;
@@ -63,12 +64,12 @@ public class Cargar extends Application {
     ScrollPane sp;
     GraphicsContext gContext, gContext2;
     Canvas can1, can2;
-    private int size;
+    private int size, rot;
     private int pix;
     MosaicFile mFile;
     Mosaic mosaic;
     Long pixels;
-    
+    String name;
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -82,7 +83,11 @@ public class Cargar extends Application {
         hbox=new HBox(10);
         vbox=new VBox(3);
         
+        rot=0;
+        
         //instancio los botones
+        btnRotate=new Button("Rotate images");
+        btnRotate.setDisable(true);
         btnLoad=new Button(" Load Image");
         btnLoad.setDisable(true);
         btnSet=new Button(" Set data");
@@ -106,8 +111,8 @@ public class Cargar extends Application {
                 im=getImageView();
                 //dibujo canvas 1
                 can1.setVisible(true);
-                can1.setHeight(im.getHeight());
-                can1.setWidth(im.getWidth());
+                can1.setHeight(im.getHeight()-(im.getHeight()%100));
+                can1.setWidth(im.getWidth()-(im.getWidth()%100));
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
@@ -129,7 +134,8 @@ public class Cargar extends Application {
             public void handle(ActionEvent t) {
                 btnLoad.setDisable(false);
                 btnSave.setDisable(false);
-                String name=tfdNombre.getText();
+                btnRotate.setDisable(false);
+                name=tfdNombre.getText();
                 String pix=tfdPixel.getText();
                 if(name.equals("")){
                     //validamos que no esté vacío
@@ -146,14 +152,14 @@ public class Cargar extends Application {
                         File file=new File("./"+name+".dat");
                         mFile=new MosaicFile(file);
                         mFile.addEndRecord(mosaic);
+                        initCom(gContext2, pixels);
+                        btnSet.setDisable(true);
                     }catch(Exception e){
                         tfdNombre.setText("");
                         tfdPixel.setText("");
                         System.out.println(e);
                     }
                 }
-                initCom(gContext2, pixels);
-                btnSet.setDisable(true);
             }
         });
         
@@ -185,6 +191,18 @@ public class Cargar extends Application {
             }
         });
         
+        btnRotate.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent t) {
+                if(rot==0){
+                    rot=1;
+                }else{
+                    rot=0;
+                }
+            }
+        });
+        
         //acción del canvas de imagen
         can1.setOnMouseClicked(new EventHandler<MouseEvent>(){
 
@@ -192,53 +210,20 @@ public class Cargar extends Application {
             public void handle(MouseEvent t) {
                 int x=(int)t.getX();
                 int y=(int)t.getY();
+                int tempx=(x%100);
+                int tempy=(y%100);
                 
-                //al recortar produce el error de no seleccionar correctamente las cordenadas (x,y)
-                if(im.getHeight()<can2.getHeight()){
-                    if(x%100==0 && y%100==0){
-                        WritableImage wim=new WritableImage(100, 100);
-                        SnapshotParameters snp=new SnapshotParameters();
-                        Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
-                        snp.setViewport(rec);
-                        imv.setImage(can1.snapshot(snp, wim));
-                    }else{
-                        int tempx=x%100;
-                        int tempy=y%100;
-
-                        x=x-tempx;
-                        y=y-tempy;
-
-                        System.out.println("("+x+","+y+")");
-
-                        WritableImage wim=new WritableImage(100, 100);
-                        SnapshotParameters snp=new SnapshotParameters();
-                        Rectangle2D rec=new Rectangle2D(x+181, y+0.2, 100, 100);
-                        snp.setViewport(rec);
-                        imv.setImage(can1.snapshot(snp, wim));
-                    }
-                }else{
-                    if(x%100==0 && y%100==0){
-                        WritableImage wim=new WritableImage(100, 100);
-                        SnapshotParameters snp=new SnapshotParameters();
-                        Rectangle2D rec=new Rectangle2D(x, y, 100, 100);
-                        snp.setViewport(rec);
-                        imv.setImage(can1.snapshot(snp, wim));
-                    }else{
-                        int tempx=x%100;
-                        int tempy=y%100;
-
-                        x=x-tempx;
-                        y=y-tempy;
-
-                        System.out.println("Say Hi");
-
-                        WritableImage wim=new WritableImage(100, 100);
-                        SnapshotParameters snp=new SnapshotParameters();
-                        Rectangle2D rec=new Rectangle2D(x+181, y+0.2, 100, 100);
-                        snp.setViewport(rec);
-                        imv.setImage(can1.snapshot(snp, wim));
-                    }
-                }
+                //redefino x, y
+                x=x-tempx;
+                y=y-tempy;
+                
+                System.out.println(x+", "+y);
+                
+                WritableImage wim=new WritableImage(100, 100);
+                SnapshotParameters snp=new SnapshotParameters();
+                Rectangle2D rec=new Rectangle2D(x+90, y+0.2, 100, 100);
+                snp.setViewport(rec);
+                imv.setImage(can1.snapshot(snp, wim));
             }
         });
         
@@ -268,7 +253,24 @@ public class Cargar extends Application {
             }
         });
         
-        vbox.getChildren().addAll(lblNombre, tfdNombre,lblPixel, tfdPixel,btnLoad, btnSet, btnSave);
+        //probando como rotar
+        can2.setOnMousePressed(new EventHandler<MouseEvent>() {
+            
+            
+            @Override
+            public void handle(MouseEvent t) {
+                int xx=(int)t.getX();
+                int yy=(int)t.getY();
+                
+                xx=xx-(xx%100);
+                yy=yy-(yy%100); 
+                
+                System.out.println("Hi");
+            }
+        });
+        
+        vbox.setSpacing(10);
+        vbox.getChildren().addAll(lblNombre, tfdNombre,lblPixel, tfdPixel,btnLoad, btnSet, btnSave, btnRotate);
         
         hbox.getChildren().addAll(vbox, can1, can2);
         hbox.setVisible(true);
