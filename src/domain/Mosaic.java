@@ -10,7 +10,7 @@ package domain;
  * @author faubricioch
  */
 public class Mosaic {
-    private String name;
+    private String name, pathImage, pathMosaic;
     private long pixels;
 
     public Mosaic() {
@@ -39,12 +39,24 @@ public class Mosaic {
         this.pixels = pixels;
     }
 
-    @Override
-    public String toString() {
-        return "Mosaic{" + "name=" + name + ", pixels=" + pixels + '}';
+    public String getPathImage() {
+        return pathImage;
+    }
+
+    public void setPathImage(String pathImage) {
+        this.pathImage = pathImage;
+    }
+
+    public String getPathMosaic() {
+        return pathMosaic;
+    }
+
+    public void setPathMosaic(String pathMosaic) {
+        this.pathMosaic = pathMosaic;
     }
     
     public int sizeInBytes(){
-        return this.getName().length()*2 + 8;
+        return this.getName().length()*2 + this.getPathImage().length()*2 + 
+                this.getPathMosaic().length()*2 + 8;
     }
 }

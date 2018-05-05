@@ -53,10 +53,10 @@ import javax.imageio.ImageIO;
 public class Cargar extends Application {
     
     HBox hbox;
-    VBox vbox;
+    VBox vbox, vb;
     Button btnSet, btnLoad, btnSave, btnRotate;
-    TextField tfdNombre, tfdPixel;
-    Label lblNombre, lblPixel;
+    TextField tfdNombre, tfdPixel, tfdSquare;
+    Label lblNombre, lblPixel, lblSquare;
     Image im;
     ImageView myImage; 
     ImageView myImage2;
@@ -81,6 +81,7 @@ public class Cargar extends Application {
         //instancio el hbox y el vbox y les doy el espacio entre cada child
         hbox=new HBox(10);
         vbox=new VBox(3);
+        vb=new VBox(3);
         
         rot=0;
         sp1=getScrollPane(can1);
@@ -94,9 +95,11 @@ public class Cargar extends Application {
         btnSave=new Button(" Save Project");
         btnSave.setDisable(true);
         lblNombre=new Label(" Project Name");
-        lblPixel=new Label(" PixelSize");
+        lblPixel=new Label(" Pixel Size");
+        lblSquare=new Label(" Square Size");
         tfdNombre=new TextField();
         tfdPixel=new TextField();
+        tfdSquare=new TextField();
         
         //instancio los image view
         myImage=new ImageView();
@@ -110,17 +113,18 @@ public class Cargar extends Application {
                 //cargo la imagen
                 im=getImageView();
                 //dibujo canvas 1
+                size=Integer.parseInt(tfdSquare.getText());
                 can1.setVisible(true);
-                can1.setHeight(im.getHeight()-(im.getHeight()%100));
-                can1.setWidth(im.getWidth()-(im.getWidth()%100));
+                can1.setHeight(im.getHeight()-(im.getHeight()%size));
+                can1.setWidth(im.getWidth()-(im.getWidth()%size));
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
-                for(int i=0; i<im.getHeight(); i=i+100){
-                    gContext.strokeLine(100+i, 0, 100+i, im.getHeight());
+                for(int i=0; i<im.getHeight(); i=i+size){
+                    gContext.strokeLine(size+i, 0, size+i, im.getHeight());
                 }
-                for(int i=0; i<im.getWidth(); i=i+100){
-                    gContext.strokeLine(0, 100+i, im.getWidth(), 100+i);
+                for(int i=0; i<im.getWidth(); i=i+size){
+                    gContext.strokeLine(0, size+i, im.getWidth(), size+i);
                 }
                 gContext.setLineWidth(1);
                 gContext.fill();
@@ -210,8 +214,8 @@ public class Cargar extends Application {
             public void handle(MouseEvent t) {
                 int x=(int)t.getX();
                 int y=(int)t.getY();
-                int tempx=(x%100);
-                int tempy=(y%100);
+                int tempx=(x%size);
+                int tempy=(y%size);
                 
                 //redefino x, y
                 x=x-tempx;
@@ -219,9 +223,9 @@ public class Cargar extends Application {
                 
                 System.out.println(x+", "+y);
                 
-                WritableImage wim=new WritableImage(100, 100);
+                WritableImage wim=new WritableImage(size, size);
                 SnapshotParameters snp=new SnapshotParameters();
-                Rectangle2D rec=new Rectangle2D(x+90, y+0.2, 100, 100);
+                Rectangle2D rec=new Rectangle2D(x+90, y+0.2, size, size);
                 snp.setViewport(rec);
                 imv.setImage(can1.snapshot(snp, wim));
             }
@@ -236,12 +240,12 @@ public class Cargar extends Application {
                 int tempx=0;
                 int tempy=0;
                 
-                if(x%100==0 && y%100==0){
+                if(x%size==0 && y%size==0){
                     gContext= can2.getGraphicsContext2D();
                     gContext.drawImage(imv.getImage(), x, y);
                 }else{
-                    tempx=x%100;
-                    tempy=y%100;
+                    tempx=x%size;
+                    tempy=y%size;
                     
                     x=x-tempx;
                     y=y-tempy;
@@ -270,9 +274,9 @@ public class Cargar extends Application {
         });
         
         vbox.setSpacing(10);
-        vbox.getChildren().addAll(lblNombre, tfdNombre,lblPixel, tfdPixel,btnLoad, btnSet, btnSave, btnRotate);
-        
-        hbox.getChildren().addAll(vbox, sp1, sp2);
+        vbox.getChildren().addAll(lblNombre, tfdNombre,lblPixel, tfdPixel, lblSquare, tfdSquare,btnLoad, btnSet , btnRotate);
+        vb.getChildren().addAll(sp1, sp2, btnSave);
+        hbox.getChildren().addAll(vbox, vb);
         hbox.setVisible(true);
         
         //instancio el scene y lo agrego al stage
