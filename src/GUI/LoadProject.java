@@ -95,10 +95,10 @@ public class LoadProject extends Application{
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
-                for(int i=0; i<im.getHeight(); i=i+100){
+                for(int i=0; i<im.getWidth(); i=i+100){
                     gContext.strokeLine(100+i, 0, 100+i, im.getHeight());
                 }
-                for(int i=0; i<im.getWidth(); i=i+100){
+                for(int i=0; i<im.getHeight(); i=i+100){
                     gContext.strokeLine(0, 100+i, im.getWidth(), 100+i);
                 }
                 gContext.setLineWidth(1);

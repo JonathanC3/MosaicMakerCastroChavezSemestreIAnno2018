@@ -26,7 +26,7 @@ public class MosaicFile {
         myFilePath = file.getPath();
         
         //indico el tamanno m'aximo
-        this.regSize = 100;
+        this.regSize = 200;
         
         //una validaci'on sencilla
         if(file.exists() && !file.isFile()){
@@ -64,6 +64,8 @@ public class MosaicFile {
                 randomAccessFile.seek(position * this.regSize);
                 randomAccessFile.writeUTF(mosaic.getName());
                 randomAccessFile.writeLong(mosaic.getPixels());
+                randomAccessFile.writeUTF(mosaic.getPathImage());
+                randomAccessFile.writeUTF(mosaic.getPathMosaic());
                 return true;
             }
         }
@@ -78,17 +80,19 @@ public class MosaicFile {
         return success;
     }
     
-    //obtener un estudiante
+    //obtener un mosaico
     public Mosaic getMosaic(int position) throws IOException{
         //validar la posici'on
         if(position >= 0 && position <= this.regsQuantity){
             //colocamos el brazo en el lugar adecuado
-            randomAccessFile.seek(position * this.regSize);
+            randomAccessFile.seek(this.regsQuantity * this.regSize);
             
             //llevamos a cabo la lectura
             Mosaic mosaicTemp = new Mosaic();
             mosaicTemp.setName(randomAccessFile.readUTF());
             mosaicTemp.setPixels(randomAccessFile.readInt());
+            mosaicTemp.setPathImage(randomAccessFile.readUTF());
+            mosaicTemp.setPathMosaic(randomAccessFile.readUTF());
             
             if(mosaicTemp.getName().equalsIgnoreCase("deleted")){
                 return null;

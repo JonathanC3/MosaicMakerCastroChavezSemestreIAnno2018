@@ -53,7 +53,7 @@ import javax.imageio.ImageIO;
 public class Cargar extends Application {
     
     HBox hbox;
-    VBox vbox;
+    VBox vbox, vb;
     Button btnSet, btnLoad, btnSave, btnRotate;
     TextField tfdNombre, tfdPixel;
     Label lblNombre, lblPixel;
@@ -61,7 +61,7 @@ public class Cargar extends Application {
     ImageView myImage; 
     ImageView myImage2;
     ImageView imv=new ImageView();
-    ScrollPane sp;
+    ScrollPane sp1, sp2;
     GraphicsContext gContext, gContext2;
     Canvas can1, can2;
     private int size, rot;
@@ -69,7 +69,7 @@ public class Cargar extends Application {
     MosaicFile mFile;
     Mosaic mosaic;
     Long pixels;
-    String name;
+    String name, pathImage, pathMosaic;
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -78,10 +78,12 @@ public class Cargar extends Application {
         can1=new Canvas();
         can2=new Canvas();
         
-        sp=new ScrollPane();
+        sp1=getScrollPane(can1);
+        sp2=getScrollPane(can2);
         //instancio el hbox y el vbox y les doy el espacio entre cada child
         hbox=new HBox(10);
         vbox=new VBox(3);
+        vb=new VBox(3);
         
         rot=0;
         
@@ -116,10 +118,10 @@ public class Cargar extends Application {
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
-                for(int i=0; i<im.getHeight(); i=i+100){
+                for(int i=0; i<=im.getWidth(); i=i+100){
                     gContext.strokeLine(100+i, 0, 100+i, im.getHeight());
                 }
-                for(int i=0; i<im.getWidth(); i=i+100){
+                for(int i=0; i<=im.getHeight(); i=i+100){
                     gContext.strokeLine(0, 100+i, im.getWidth(), 100+i);
                 }
                 gContext.setLineWidth(1);
@@ -132,9 +134,7 @@ public class Cargar extends Application {
 
             @Override
             public void handle(ActionEvent t) {
-                btnLoad.setDisable(false);
-                btnSave.setDisable(false);
-                btnRotate.setDisable(false);
+                
                 name=tfdNombre.getText();
                 String pix=tfdPixel.getText();
                 if(name.equals("")){
@@ -147,13 +147,11 @@ public class Cargar extends Application {
                         //validamos que sea un numero
                         pixels=Long.parseLong(pix);
                         
-                        mosaic.setName(name);
-                        mosaic.setPixels(pixels);
-                        File file=new File("./"+name+".dat");
-                        mFile=new MosaicFile(file);
-                        mFile.addEndRecord(mosaic);
                         initCom(gContext2, pixels);
                         btnSet.setDisable(true);
+                        btnLoad.setDisable(false);
+                        btnSave.setDisable(false);
+                        btnRotate.setDisable(false);
                     }catch(Exception e){
                         tfdNombre.setText("");
                         tfdPixel.setText("");
@@ -179,6 +177,7 @@ public class Cargar extends Application {
                 //le doy la ruta de guardado a la imagen
                 FileChooser fch=new FileChooser();
                 File f= fch.showSaveDialog(null);
+                pathMosaic=f.getPath();
                 //renderizo la imagen
                 BufferedImage bf= SwingFXUtils.fromFXImage(img.getImage(), null);
                 
@@ -187,6 +186,19 @@ public class Cargar extends Application {
                     ImageIO.write(bf, "png", f);
                 } catch (IOException ex) {
                     Logger.getLogger(Cargar.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                //guardo los datos en el fichero RAF
+                try{
+                    mosaic.setName(name);
+                    mosaic.setPixels(pixels);
+                    mosaic.setPathImage(pathImage);
+                    mosaic.setPathMosaic(pathMosaic);
+                    File file=new File("./"+name+".dat");
+                    mFile=new MosaicFile(file);
+                    mFile.addEndRecord(mosaic);
+                }catch(Exception e){
+                    
                 }
             }
         });
@@ -221,7 +233,7 @@ public class Cargar extends Application {
                 
                 WritableImage wim=new WritableImage(100, 100);
                 SnapshotParameters snp=new SnapshotParameters();
-                Rectangle2D rec=new Rectangle2D(x+90, y+0.2, 100, 100);
+                Rectangle2D rec=new Rectangle2D(x, y+0.2, 100, 100);
                 snp.setViewport(rec);
                 imv.setImage(can1.snapshot(snp, wim));
             }
@@ -253,30 +265,15 @@ public class Cargar extends Application {
             }
         });
         
-        //probando como rotar
-        can2.setOnMousePressed(new EventHandler<MouseEvent>() {
-            
-            
-            @Override
-            public void handle(MouseEvent t) {
-                int xx=(int)t.getX();
-                int yy=(int)t.getY();
-                
-                xx=xx-(xx%100);
-                yy=yy-(yy%100); 
-                
-                System.out.println("Hi");
-            }
-        });
-        
         vbox.setSpacing(10);
+        myImage2.setImage(im);
         vbox.getChildren().addAll(lblNombre, tfdNombre,lblPixel, tfdPixel,btnLoad, btnSet, btnSave, btnRotate);
-        
-        hbox.getChildren().addAll(vbox, can1, can2);
+        vb.getChildren().addAll(sp1, sp2);
+        hbox.getChildren().addAll(vbox, vb);
         hbox.setVisible(true);
         
         //instancio el scene y lo agrego al stage
-        Scene scene=new Scene(hbox, 1000, 650);
+        Scene scene=new Scene(hbox, 900, 650);
         stage.setScene(scene);
         stage.setTitle("Load Project");
     }
@@ -293,8 +290,8 @@ public class Cargar extends Application {
                       
             try {
                 BufferedImage bufferedImage = ImageIO.read(file);
-                String s=file.toString();
-                System.out.println(s);
+                pathImage=file.toString();
+                System.out.println(pathImage);
                 Image image = SwingFXUtils.toFXImage(bufferedImage, null);
                 
                 myImage.setImage(image);
@@ -309,10 +306,10 @@ public class Cargar extends Application {
         gc=this.can2.getGraphicsContext2D();
         gc.fillRect(0, 0, pix, pix);
         
-        for(int i=0; i<pix; i=i+100){
+        for(int i=0; i<=pix; i=i+100){
             gc.strokeLine(100+i, 0, 100+i, pix);
         }
-        for(int i=0; i<pix; i=i+100){
+        for(int i=0; i<=pix; i=i+100){
             gc.strokeLine(0, 100+i, pix, 100+i);
         }
         gc.setLineWidth(1);
@@ -320,7 +317,7 @@ public class Cargar extends Application {
     }
 
    private ScrollPane getScrollPane(Canvas c1){
-       
+       ScrollPane sp=new ScrollPane();
        sp.setPrefSize(300, 250);
        sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
