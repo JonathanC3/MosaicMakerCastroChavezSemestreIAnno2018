@@ -26,7 +26,7 @@ public class MosaicFile {
         myFilePath = file.getPath();
         
         //indico el tamanno m'aximo
-        this.regSize = 200;
+        this.regSize = 300;
         
         //una validaci'on sencilla
         if(file.exists() && !file.isFile()){
@@ -85,12 +85,12 @@ public class MosaicFile {
         //validar la posici'on
         if(position >= 0 && position <= this.regsQuantity){
             //colocamos el brazo en el lugar adecuado
-            randomAccessFile.seek(this.regsQuantity * this.regSize);
+            randomAccessFile.seek(position * this.regSize);
             
             //llevamos a cabo la lectura
             Mosaic mosaicTemp = new Mosaic();
             mosaicTemp.setName(randomAccessFile.readUTF());
-            mosaicTemp.setPixels(randomAccessFile.readInt());
+            mosaicTemp.setPixels(randomAccessFile.readLong());
             mosaicTemp.setPathImage(randomAccessFile.readUTF());
             mosaicTemp.setPathMosaic(randomAccessFile.readUTF());
             

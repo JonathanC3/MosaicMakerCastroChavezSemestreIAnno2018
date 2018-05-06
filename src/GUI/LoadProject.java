@@ -58,7 +58,7 @@ public class LoadProject extends Application{
     TextField txtName=new TextField();
     MosaicFile mosaicFile;
     Mosaic mosaic;
-    
+    ScrollPane sp1, sp2;
     GraphicsContext gContext;
     Canvas can1, can2;
     
@@ -68,6 +68,13 @@ public class LoadProject extends Application{
         can1=new Canvas();
         can2=new Canvas();
 //        initCom(gContext);
+        
+        //ScrollPanes
+        sp1=getScrollPane(can1);
+        sp2=getScrollPane(can2);
+        
+        //instancio objeto
+        mosaic=new Mosaic();
         
         //instancio el hbox y el vbox y les doy el espacio entre cada child
         hbox=new HBox(10);
@@ -90,8 +97,8 @@ public class LoadProject extends Application{
                 //cargo la imagen
                 Image im=getImageView();
                 can1.setVisible(true);
-                can1.setHeight(im.getHeight());
-                can1.setWidth(im.getWidth());
+                can1.setHeight(im.getHeight()-(im.getHeight()%100));
+                can1.setWidth(im.getWidth()-(im.getWidth()%100));
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
@@ -110,18 +117,46 @@ public class LoadProject extends Application{
 
             @Override
             public void handle(ActionEvent t) {
-                //cargo la imagen
-                Image im=getImageView();
+                //Busco el file
+                try{
+                    String name=txtName.getText();
+                    File fil=new File("./"+name+".dat");
+                    mosaicFile=new MosaicFile(fil);
+                    mosaic=mosaicFile.getMosaic(0);
+                    System.out.println(mosaic.getPathMosaic());
+                    System.out.println(mosaic.getPathImage());
+                }catch(Exception e){
+                    System.out.println(e);
+                }
+                
+                
+                //cargo la ultima imagen usada
+                String p=mosaic.getPathImage();
+                Image im1=new Image(new File(p).toURI().toString());
+                can1.setHeight(im1.getHeight()-(im1.getHeight()%100));
+                can1.setWidth(im1.getWidth()-(im1.getWidth()%100));
+                gContext=can1.getGraphicsContext2D();
+                gContext.drawImage(im1, 0, 0);
+                for(int i=0; i<im1.getWidth(); i=i+100){
+                    gContext.strokeLine(100+i, 0, 100+i, im1.getHeight());
+                }
+                for(int i=0; i<im1.getHeight(); i=i+100){
+                    gContext.strokeLine(0, 100+i, im1.getWidth(), 100+i);
+                }
+
+                //cargo el mosaico ya guardado
+                String p1=mosaic.getPathMosaic();
+                Image im=new Image(new File(p1).toURI().toString());
                 can2.setVisible(true);
-                can2.setHeight(300);
-                can2.setWidth(300);
+                can2.setHeight(mosaic.getPixels());
+                can2.setWidth(mosaic.getPixels());
                 gContext=can2.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 0, 0);
-                for(int i=0; i<im.getHeight(); i=i+100){
+                for(int i=0; i<im.getWidth(); i=i+100){
                     gContext.strokeLine(100+i, 0, 100+i, im.getHeight());
                 }
-                for(int i=0; i<im.getWidth(); i=i+100){
+                for(int i=0; i<im.getHeight(); i=i+100){
                     gContext.strokeLine(0, 100+i, im.getWidth(), 100+i);
                 }
                 gContext.setLineWidth(1);
@@ -156,31 +191,20 @@ public class LoadProject extends Application{
             public void handle(MouseEvent t) {
                 int x=(int)t.getX();
                 int y=(int)t.getY();
+                int tempx=(x%100);
+                int tempy=(y%100);
                 
-                if(x%100==0 && y%100==0){
-                    WritableImage wim=new WritableImage(100, 100);
-                    SnapshotParameters snp=new SnapshotParameters();
-                    Rectangle2D rec=new Rectangle2D(x+30, y, 100, 100);
-                    snp.setViewport(rec);
-                    imv.setImage(can1.snapshot(snp, wim));
-                }else{
-                    int tempx=x%100;
-                    int tempy=y%100;
-                    
-                    x=x-tempx;
-                    y=y-tempy;
-                    
-                    System.out.println(x+" "+y);
-                    
-                    System.out.println("("+x+","+y+")");
-                    
-                    WritableImage wim=new WritableImage(100, 100);
-                    SnapshotParameters snp=new SnapshotParameters();
-                    Rectangle2D rec=new Rectangle2D(x+123.09, y+0.2, 100, 100);
-                    snp.setViewport(rec);
-                    imv.setImage(can1.snapshot(snp, wim));
-                }
+                //redefino x, y
+                x=x-tempx;
+                y=y-tempy;
                 
+                System.out.println(x+", "+y);
+                
+                WritableImage wim=new WritableImage(100, 100);
+                SnapshotParameters snp=new SnapshotParameters();
+                Rectangle2D rec=new Rectangle2D(x, y+0.2, 100, 100);
+                snp.setViewport(rec);
+                imv.setImage(can1.snapshot(snp, wim));    
             }
         });
         
@@ -212,7 +236,7 @@ public class LoadProject extends Application{
         
         vbox.getChildren().addAll(btnLoad, btnSearch, saveProject, lbl, txtName);
         
-        hbox.getChildren().addAll(vbox, can1, can2);
+        hbox.getChildren().addAll(vbox, sp1, sp2);
         hbox.setVisible(true);
         
         //instancio el scene y lo agrego al stage
@@ -286,18 +310,12 @@ public class LoadProject extends Application{
             return myImage2;
     }
     
-//    public void initCom(GraphicsContext gc){
-//        //define el tamaño por defecto que tendrá el segundo canvas
-//        this.can2.setHeight(300);
-//        this.can2.setWidth(300);
-//        //le doy al graphicContext los datos o medidas del canvas
-//        gc=this.can2.getGraphicsContext2D();
-//        //define un rectangulo del tamaño del canvas en el canvas
-//        gc.fillRect(0, 0, this.can2.getWidth(), can2.getHeight());
-//        //
-//        gc.strokeLine(0, 100, this.can2.getWidth(), 100);
-//        gc.setFill(Color.WHITE);
-//        gc.setLineWidth(1);
-//        this.can2.setVisible(true);
-//    }
+    private ScrollPane getScrollPane(Canvas c1){
+       ScrollPane sp=new ScrollPane();
+       sp.setPrefSize(300, 250);
+       sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+       sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+       sp.setContent(c1);
+        return sp;
+    }
 }

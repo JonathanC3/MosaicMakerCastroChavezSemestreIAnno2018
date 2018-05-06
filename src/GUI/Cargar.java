@@ -198,7 +198,7 @@ public class Cargar extends Application {
                     mFile=new MosaicFile(file);
                     mFile.addEndRecord(mosaic);
                 }catch(Exception e){
-                    
+                    System.out.println(e);
                 }
             }
         });
