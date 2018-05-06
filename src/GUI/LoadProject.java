@@ -47,9 +47,9 @@ import javax.imageio.ImageIO;
  * @author faubricioch
  */
 public class LoadProject extends Application{
-    
+    Cargar c= new Cargar();
     HBox hbox;
-    VBox vbox;
+    VBox vbox, box;
     Button btnSearch, btnLoad, saveProject;
     ImageView myImage; 
     ImageView myImage2;
@@ -70,8 +70,8 @@ public class LoadProject extends Application{
 //        initCom(gContext);
         
         //ScrollPanes
-        sp1=getScrollPane(can1);
-        sp2=getScrollPane(can2);
+        sp1=c.getScrollPane(can1);
+        sp2=c.getScrollPane(can2);
         
         //instancio objeto
         mosaic=new Mosaic();
@@ -79,7 +79,7 @@ public class LoadProject extends Application{
         //instancio el hbox y el vbox y les doy el espacio entre cada child
         hbox=new HBox(10);
         vbox=new VBox(10);
-        
+        box=new VBox(10);
         //instancio los botones
         btnLoad=new Button("Load Image");
         btnSearch=new Button("Search Project");
@@ -95,7 +95,7 @@ public class LoadProject extends Application{
             @Override
             public void handle(ActionEvent t) {
                 //cargo la imagen
-                Image im=getImageView();
+                Image im=c.getImageView();
                 can1.setVisible(true);
                 can1.setHeight(im.getHeight()-(im.getHeight()%100));
                 can1.setWidth(im.getWidth()-(im.getWidth()%100));
@@ -235,87 +235,24 @@ public class LoadProject extends Application{
         });
         
         vbox.getChildren().addAll(btnLoad, btnSearch, saveProject, lbl, txtName);
-        
-        hbox.getChildren().addAll(vbox, sp1, sp2);
+        box.getChildren().addAll(sp1, sp2);
+        hbox.getChildren().addAll(vbox, box);
         hbox.setVisible(true);
         
         //instancio el scene y lo agrego al stage
-        Scene scene=new Scene(hbox, 1000, 650);
+        Scene scene=new Scene(hbox, 1000, 650, Color.RED);
         stage.setScene(scene);
         stage.setTitle("Load Project");
+        setUserAgentStylesheet(STYLESHEET_CASPIAN);
     }
     
     EventHandler<ActionEvent> btnLoadEventListener = new EventHandler<ActionEvent>(){
 
         @Override
         public void handle(ActionEvent t) {
-            //getImageView();
+            c.getImageView();
         }
     };
     
-    private Image getImageView(){
-        FileChooser fileChooser = new FileChooser();
-            
-            //Set extension filter
-            FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("JPG files (*.jpg)", "*.jpg");
-            FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter("PNG files (*.png)", "*.png");
-            fileChooser.getExtensionFilters().addAll(extFilterJPG, extFilterPNG);
-             
-            //Show open file dialog
-            File file = fileChooser.showOpenDialog(null);
-                      
-            try {
-                BufferedImage bufferedImage = ImageIO.read(file);
-                String s=file.toString();
-                System.out.println(s);
-                Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-                
-                myImage.setImage(image);
-            } catch (IOException ex) {
-                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            return myImage.getImage();
-    }
-    
-    EventHandler<ActionEvent> btnLoad2EventListener = new EventHandler<ActionEvent>(){
 
-        @Override
-        public void handle(ActionEvent t) {
-    
-            getImageView2();
-        }
-    };
-    
-    private ImageView getImageView2(){
-        FileChooser fileChooser = new FileChooser();
-            
-            //Set extension filter
-            FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("JPG files (*.jpg)", "*.jpg");
-            FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter("PNG files (*.png)", "*.png");
-            fileChooser.getExtensionFilters().addAll(extFilterJPG, extFilterPNG);
-             
-            //Show open file dialog
-            File file = fileChooser.showOpenDialog(null);
-                      
-            try {
-                BufferedImage bufferedImage = ImageIO.read(file);
-                String s=file.toString();
-                System.out.println(s);
-                Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-                
-                myImage2.setImage(image);
-            } catch (IOException ex) {
-                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            return myImage2;
-    }
-    
-    private ScrollPane getScrollPane(Canvas c1){
-       ScrollPane sp=new ScrollPane();
-       sp.setPrefSize(300, 250);
-       sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-       sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-       sp.setContent(c1);
-        return sp;
-    }
 }
