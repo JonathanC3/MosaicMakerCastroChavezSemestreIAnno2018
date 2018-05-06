@@ -64,6 +64,7 @@ public class MosaicFile {
                 randomAccessFile.seek(position * this.regSize);
                 randomAccessFile.writeUTF(mosaic.getName());
                 randomAccessFile.writeLong(mosaic.getPixels());
+                randomAccessFile.writeLong(mosaic.getSqPixels());
                 randomAccessFile.writeUTF(mosaic.getPathImage());
                 randomAccessFile.writeUTF(mosaic.getPathMosaic());
                 return true;
@@ -91,6 +92,7 @@ public class MosaicFile {
             Mosaic mosaicTemp = new Mosaic();
             mosaicTemp.setName(randomAccessFile.readUTF());
             mosaicTemp.setPixels(randomAccessFile.readLong());
+            mosaicTemp.setSqPixels(randomAccessFile.readLong());
             mosaicTemp.setPathImage(randomAccessFile.readUTF());
             mosaicTemp.setPathMosaic(randomAccessFile.readUTF());
             

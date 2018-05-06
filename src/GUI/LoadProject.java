@@ -133,31 +133,31 @@ public class LoadProject extends Application{
                 //cargo la ultima imagen usada
                 String p=mosaic.getPathImage();
                 Image im1=new Image(new File(p).toURI().toString());
-                can1.setHeight(im1.getHeight()-(im1.getHeight()%100));
-                can1.setWidth(im1.getWidth()-(im1.getWidth()%100));
+                can1.setHeight(im1.getHeight()-(im1.getHeight()%mosaic.getSqPixels()));
+                can1.setWidth(im1.getWidth()-(im1.getWidth()%mosaic.getSqPixels()));
                 gContext=can1.getGraphicsContext2D();
                 gContext.drawImage(im1, 0, 0);
-                for(int i=0; i<im1.getWidth(); i=i+100){
-                    gContext.strokeLine(100+i, 0, 100+i, im1.getHeight());
+                for(int i=0; i<im1.getWidth(); i=i+(int)mosaic.getSqPixels()){
+                    gContext.strokeLine(mosaic.getSqPixels()+i, 0, mosaic.getSqPixels()+i, im1.getHeight());
                 }
-                for(int i=0; i<im1.getHeight(); i=i+100){
-                    gContext.strokeLine(0, 100+i, im1.getWidth(), 100+i);
+                for(int i=0; i<im1.getHeight(); i=i+(int)mosaic.getSqPixels()){
+                    gContext.strokeLine(0, mosaic.getSqPixels()+i, im1.getWidth(), mosaic.getSqPixels()+i);
                 }
 
                 //cargo el mosaico ya guardado
                 String p1=mosaic.getPathMosaic();
                 Image im=new Image(new File(p1).toURI().toString());
                 can2.setVisible(true);
-                can2.setHeight(mosaic.getPixels());
-                can2.setWidth(mosaic.getPixels());
+                can2.setHeight(mosaic.getPixels()-(mosaic.getPixels()%mosaic.getSqPixels()));
+                can2.setWidth(mosaic.getPixels()-(mosaic.getPixels()%mosaic.getSqPixels()));
                 gContext=can2.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 0, 0);
-                for(int i=0; i<im.getWidth(); i=i+100){
-                    gContext.strokeLine(100+i, 0, 100+i, im.getHeight());
+                for(int i=0; i<im.getWidth(); i=i+(int)mosaic.getSqPixels()){
+                    gContext.strokeLine(mosaic.getSqPixels()+i, 0, mosaic.getSqPixels()+i, im.getHeight());
                 }
-                for(int i=0; i<im.getHeight(); i=i+100){
-                    gContext.strokeLine(0, 100+i, im.getWidth(), 100+i);
+                for(int i=0; i<im.getHeight(); i=i+(int)mosaic.getSqPixels()){
+                    gContext.strokeLine(0, mosaic.getSqPixels()+i, im.getWidth(), mosaic.getSqPixels()+i);
                 }
                 gContext.setLineWidth(1);
                 gContext.fill();
@@ -191,8 +191,8 @@ public class LoadProject extends Application{
             public void handle(MouseEvent t) {
                 int x=(int)t.getX();
                 int y=(int)t.getY();
-                int tempx=(x%100);
-                int tempy=(y%100);
+                int tempx=(x%(int)mosaic.getSqPixels());
+                int tempy=(y%(int)mosaic.getSqPixels());
                 
                 //redefino x, y
                 x=x-tempx;
@@ -200,9 +200,9 @@ public class LoadProject extends Application{
                 
                 System.out.println(x+", "+y);
                 
-                WritableImage wim=new WritableImage(100, 100);
+                WritableImage wim=new WritableImage((int)mosaic.getSqPixels(),(int)mosaic.getSqPixels());
                 SnapshotParameters snp=new SnapshotParameters();
-                Rectangle2D rec=new Rectangle2D(x, y+0.2, 100, 100);
+                Rectangle2D rec=new Rectangle2D(x, y+0.2, mosaic.getSqPixels(), mosaic.getSqPixels());
                 snp.setViewport(rec);
                 imv.setImage(can1.snapshot(snp, wim));    
             }
@@ -217,12 +217,12 @@ public class LoadProject extends Application{
                 int tempx=0;
                 int tempy=0;
                 
-                if(x%100==0 && y%100==0){
+                if(x%mosaic.getSqPixels()==0 && y%mosaic.getSqPixels()==0){
                     gContext= can2.getGraphicsContext2D();
                     gContext.drawImage(imv.getImage(), x, y);
                 }else{
-                    tempx=x%100;
-                    tempy=y%100;
+                    tempx=x%(int)mosaic.getSqPixels();
+                    tempy=y%(int)mosaic.getSqPixels();
                     
                     x=x-tempx;
                     y=y-tempy;

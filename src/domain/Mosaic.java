@@ -11,16 +11,24 @@ package domain;
  */
 public class Mosaic {
     private String name, pathImage, pathMosaic;
-    private long pixels;
+    private long pixels, sqPixels;
 
     public Mosaic() {
         this.name="";
         this.pixels=0;
     }
 
-    public Mosaic(String name, int pixels) {
+    public Mosaic(String name, long pixels) {
         this.name = name;
         this.pixels = pixels;
+    }
+
+    public long getSqPixels() {
+        return sqPixels;
+    }
+
+    public void setSqPixels(long sqPixels) {
+        this.sqPixels = sqPixels;
     }
 
     public String getName() {
@@ -57,6 +65,6 @@ public class Mosaic {
     
     public int sizeInBytes(){
         return this.getName().length()*2 + this.getPathImage().length()*2 + 
-                this.getPathMosaic().length()*2 + 8;
+                this.getPathMosaic().length()*2 + 16;
     }
 }

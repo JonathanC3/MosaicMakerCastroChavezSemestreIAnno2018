@@ -78,15 +78,15 @@ public class Cargar extends Application {
         can1=new Canvas();
         can2=new Canvas();
         
-        sp1=getScrollPane(can1);
-        sp2=getScrollPane(can2);
+        
         //instancio el hbox y el vbox y les doy el espacio entre cada child
         hbox=new HBox(10);
         vbox=new VBox(3);
         vb=new VBox(3);
         
         rot=0;
-        
+        sp1=getScrollPane(can1);
+        sp2=getScrollPane(can2);
         //instancio los botones
         btnRotate=new Button("Rotate images");
         btnRotate.setDisable(true);
@@ -97,8 +97,11 @@ public class Cargar extends Application {
         btnSave.setDisable(true);
         lblNombre=new Label(" Project Name");
         lblPixel=new Label(" PixelSize");
+        lblPixel=new Label(" Pixel Size");
+        Label lblSquare=new Label(" Square Size");
         tfdNombre=new TextField();
         tfdPixel=new TextField();
+        TextField tfdSquare=new TextField();
         
         //instancio los image view
         myImage=new ImageView();
@@ -113,16 +116,16 @@ public class Cargar extends Application {
                 im=getImageView();
                 //dibujo canvas 1
                 can1.setVisible(true);
-                can1.setHeight(im.getHeight()-(im.getHeight()%100));
-                can1.setWidth(im.getWidth()-(im.getWidth()%100));
+                can1.setHeight(im.getHeight()-(im.getHeight()%size));
+                can1.setWidth(im.getWidth()-(im.getWidth()%size));
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
-                for(int i=0; i<=im.getWidth(); i=i+100){
-                    gContext.strokeLine(100+i, 0, 100+i, im.getHeight());
+                for(int i=0; i<=im.getWidth(); i=i+size){
+                    gContext.strokeLine(size+i, 0, size+i, im.getHeight());
                 }
-                for(int i=0; i<=im.getHeight(); i=i+100){
-                    gContext.strokeLine(0, 100+i, im.getWidth(), 100+i);
+                for(int i=0; i<=im.getHeight(); i=i+size){
+                    gContext.strokeLine(0, size+i, im.getWidth(), size+i);
                 }
                 gContext.setLineWidth(1);
                 gContext.fill();
@@ -146,6 +149,8 @@ public class Cargar extends Application {
                     try{
                         //validamos que sea un numero
                         pixels=Long.parseLong(pix);
+                        size=Integer.parseInt(tfdSquare.getText());
+                        System.out.println("pix: "+pix+" pixels: "+pixels);
                         
                         initCom(gContext2, pixels);
                         btnSet.setDisable(true);
@@ -192,6 +197,7 @@ public class Cargar extends Application {
                 try{
                     mosaic.setName(name);
                     mosaic.setPixels(pixels);
+                    mosaic.setSqPixels(size);
                     mosaic.setPathImage(pathImage);
                     mosaic.setPathMosaic(pathMosaic);
                     File file=new File("./"+name+".dat");
@@ -222,8 +228,8 @@ public class Cargar extends Application {
             public void handle(MouseEvent t) {
                 int x=(int)t.getX();
                 int y=(int)t.getY();
-                int tempx=(x%100);
-                int tempy=(y%100);
+                int tempx=(x%size);
+                int tempy=(y%size);
                 
                 //redefino x, y
                 x=x-tempx;
@@ -231,9 +237,10 @@ public class Cargar extends Application {
                 
                 System.out.println(x+", "+y);
                 
-                WritableImage wim=new WritableImage(100, 100);
+                WritableImage wim=new WritableImage(size, size);
                 SnapshotParameters snp=new SnapshotParameters();
-                Rectangle2D rec=new Rectangle2D(x, y+0.2, 100, 100);
+//                Rectangle2D rec=new Rectangle2D(x, y+0.2, 100, 100);
+                Rectangle2D rec=new Rectangle2D(x, y+0.2, size, size);
                 snp.setViewport(rec);
                 imv.setImage(can1.snapshot(snp, wim));
             }
@@ -248,12 +255,12 @@ public class Cargar extends Application {
                 int tempx=0;
                 int tempy=0;
                 
-                if(x%100==0 && y%100==0){
+                if(x%size==0 && y%size==0){
                     gContext= can2.getGraphicsContext2D();
                     gContext.drawImage(imv.getImage(), x, y);
                 }else{
-                    tempx=x%100;
-                    tempy=y%100;
+                    tempx=x%size;
+                    tempy=y%size;
                     
                     x=x-tempx;
                     y=y-tempy;
@@ -266,8 +273,9 @@ public class Cargar extends Application {
         });
         
         vbox.setSpacing(10);
-        myImage2.setImage(im);
-        vbox.getChildren().addAll(lblNombre, tfdNombre,lblPixel, tfdPixel,btnLoad, btnSet, btnSave, btnRotate);
+        //vbox.getChildren().addAll(lblNombre, tfdNombre,lblPixel, tfdPixel,btnLoad, btnSet, btnSave, btnRotate);
+        //vb.getChildren().addAll(sp1, sp2);
+        vbox.getChildren().addAll(lblNombre, tfdNombre,lblPixel, tfdPixel, lblSquare, tfdSquare,btnLoad, btnSet , btnSave,  btnRotate);
         vb.getChildren().addAll(sp1, sp2);
         hbox.getChildren().addAll(vbox, vb);
         hbox.setVisible(true);
@@ -301,16 +309,18 @@ public class Cargar extends Application {
             return myImage.getImage();
     }
     public void initCom(GraphicsContext gc, long pix){
+        pix=pix-(pix%size);
+        
         this.can2.setHeight(pix);
         this.can2.setWidth(pix);
         gc=this.can2.getGraphicsContext2D();
         gc.fillRect(0, 0, pix, pix);
         
-        for(int i=0; i<=pix; i=i+100){
-            gc.strokeLine(100+i, 0, 100+i, pix);
+        for(int i=0; i<=pix; i=i+size){
+            gc.strokeLine(size+i, 0, size+i, pix);
         }
-        for(int i=0; i<=pix; i=i+100){
-            gc.strokeLine(0, 100+i, pix, 100+i);
+        for(int i=0; i<=pix; i=i+size){
+            gc.strokeLine(0, size+i, pix, size+i);
         }
         gc.setLineWidth(1);
         gc.fill();
