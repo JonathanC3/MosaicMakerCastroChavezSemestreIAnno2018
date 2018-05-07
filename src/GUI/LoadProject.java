@@ -7,6 +7,7 @@ package GUI;
 
 import data.MosaicFile;
 import domain.Mosaic;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -61,6 +62,7 @@ public class LoadProject extends Application{
     ScrollPane sp1, sp2;
     GraphicsContext gContext;
     Canvas can1, can2;
+    String name, pathIm, pathMosaic;
     
     @Override
     public void start(Stage stage) throws Exception {
@@ -95,18 +97,18 @@ public class LoadProject extends Application{
             @Override
             public void handle(ActionEvent t) {
                 //cargo la imagen
-                Image im=c.getImageView();
+                Image im=getImageView();
                 can1.setVisible(true);
-                can1.setHeight(im.getHeight()-(im.getHeight()%100));
-                can1.setWidth(im.getWidth()-(im.getWidth()%100));
+                can1.setHeight(im.getHeight()-(im.getHeight()%mosaic.getSqPixels()));
+                can1.setWidth(im.getWidth()-(im.getWidth()%mosaic.getSqPixels()));
                 gContext=can1.getGraphicsContext2D();
                 gContext.fillRect(0, 0, im.getWidth(), im.getHeight());
                 gContext.drawImage(im, 1, 1);
-                for(int i=0; i<im.getWidth(); i=i+100){
-                    gContext.strokeLine(100+i, 0, 100+i, im.getHeight());
+                for(int i=0; i<im.getWidth(); i=i+(int)mosaic.getSqPixels()){
+                    gContext.strokeLine(mosaic.getSqPixels()+i, 0, mosaic.getSqPixels()+i, im.getHeight());
                 }
-                for(int i=0; i<im.getHeight(); i=i+100){
-                    gContext.strokeLine(0, 100+i, im.getWidth(), 100+i);
+                for(int i=0; i<im.getHeight(); i=i+(int)mosaic.getSqPixels()){
+                    gContext.strokeLine(0, mosaic.getSqPixels()+i, im.getWidth(), mosaic.getSqPixels()+i);
                 }
                 gContext.setLineWidth(1);
                 gContext.fill();
@@ -119,12 +121,10 @@ public class LoadProject extends Application{
             public void handle(ActionEvent t) {
                 //Busco el file
                 try{
-                    String name=txtName.getText();
+                    name=txtName.getText();
                     File fil=new File("./"+name+".dat");
                     mosaicFile=new MosaicFile(fil);
                     mosaic=mosaicFile.getMosaic(0);
-                    System.out.println(mosaic.getPathMosaic());
-                    System.out.println(mosaic.getPathImage());
                 }catch(Exception e){
                     System.out.println(e);
                 }
@@ -169,18 +169,41 @@ public class LoadProject extends Application{
 
             @Override
             public void handle(ActionEvent t) {
+                
+                ImageView img=new ImageView();
+                
+                //Recorto la imagen
+                WritableImage wri=new WritableImage((int)can2.getWidth(), (int)can2.getHeight());
+                img.setImage(can2.snapshot(null, wri));
+                
+                //le doy la ruta de guardado a la imagen
+                FileChooser fch=new FileChooser();
+                File f= fch.showSaveDialog(null);
+                pathMosaic=f.getPath();
+                //renderizo la imagen
+                BufferedImage bf= SwingFXUtils.fromFXImage(img.getImage(), null);
+                
                 try {
-                    String name=txtName.getText();
-                    //valido que el nombre no sea vacío
-//                while(name.equals("")){
-//                }
-                    String path="./"+name+".dat";
-                    File mosaicF=new File(path);
-                    mosaicFile=new MosaicFile(mosaicF);
-                    mosaic=mosaicFile.getMosaic(0);
+                    //Guardo la imagen
+                    ImageIO.write(bf, "png", f);
                 } catch (IOException ex) {
-                    Logger.getLogger(LoadProject.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Cargar.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                
+                //guardo los datos en el fichero RAF
+                try{
+                    mosaic.setName(name);
+                    mosaic.setPixels(mosaic.getPixels());
+                    mosaic.setSqPixels(mosaic.getSqPixels());
+                    mosaic.setPathImage(pathIm);
+                    mosaic.setPathMosaic(pathMosaic);
+                    File file=new File("./"+name+".dat");
+                    mosaicFile=new MosaicFile(file);
+                    mosaicFile.addEndRecord(mosaic);
+                }catch(Exception e){
+                    System.out.println(e+" Hi");
+                }
+                
             }
         });
         
@@ -204,7 +227,8 @@ public class LoadProject extends Application{
                 SnapshotParameters snp=new SnapshotParameters();
                 Rectangle2D rec=new Rectangle2D(x, y+0.2, mosaic.getSqPixels(), mosaic.getSqPixels());
                 snp.setViewport(rec);
-                imv.setImage(can1.snapshot(snp, wim));    
+                imv.setImage(can1.snapshot(snp, wim));
+                
             }
         });
         
@@ -228,8 +252,16 @@ public class LoadProject extends Application{
                     y=y-tempy;
                     
                     gContext= can2.getGraphicsContext2D();
-                    gContext.drawImage(imv.getImage(), x, y);
+                    
+                    gContext.save();
+                    gContext.translate(x, y);
+                    gContext.rotate(90);
+                    System.out.println("x: "+x+" y: "+y);
+                    System.out.println(-(imv.getImage().getWidth()/2));
+                    gContext.drawImage(imv.getImage(), -(imv.getImage().getWidth()/2), -(imv.getImage().getHeight()/2));
+                    gContext.restore();
                 }
+                
                 
             }
         });
@@ -240,19 +272,33 @@ public class LoadProject extends Application{
         hbox.setVisible(true);
         
         //instancio el scene y lo agrego al stage
-        Scene scene=new Scene(hbox, 1000, 650, Color.RED);
+        Scene scene=new Scene(hbox, 1000, 650, Color.LIGHTGREEN);
         stage.setScene(scene);
         stage.setTitle("Load Project");
         setUserAgentStylesheet(STYLESHEET_CASPIAN);
     }
     
-    EventHandler<ActionEvent> btnLoadEventListener = new EventHandler<ActionEvent>(){
-
-        @Override
-        public void handle(ActionEvent t) {
-            c.getImageView();
-        }
-    };
-    
+    public Image getImageView(){
+        FileChooser fileChooser = new FileChooser();
+            
+            //Set extension filter
+            FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("JPG files (*.jpg)", "*.jpg");
+            FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter("PNG files (*.png)", "*.png");
+            fileChooser.getExtensionFilters().addAll(extFilterJPG, extFilterPNG);
+             
+            //Show open file dialog
+            File file = fileChooser.showOpenDialog(null);
+            pathIm=file.getPath();
+                      
+            try {
+                BufferedImage bufferedImage = ImageIO.read(file);
+                Image image = SwingFXUtils.toFXImage(bufferedImage, null);
+                
+                myImage.setImage(image);
+            } catch (IOException ex) {
+                Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return myImage.getImage();
+    }
 
 }

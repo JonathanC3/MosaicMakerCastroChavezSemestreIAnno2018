@@ -285,7 +285,7 @@ public class Cargar extends Application {
         stage.setScene(scene);
         stage.setTitle("Load Project");
     }
-    private Image getImageView(){
+    public Image getImageView(){
         FileChooser fileChooser = new FileChooser();
             
             //Set extension filter
@@ -326,7 +326,7 @@ public class Cargar extends Application {
         gc.fill();
     }
 
-   private ScrollPane getScrollPane(Canvas c1){
+   public ScrollPane getScrollPane(Canvas c1){
        ScrollPane sp=new ScrollPane();
        sp.setPrefSize(300, 250);
        sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);

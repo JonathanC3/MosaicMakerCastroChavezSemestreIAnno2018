@@ -74,7 +74,7 @@ public class MosaicFile {
     
     //insertar al final del archivo
     public boolean addEndRecord(Mosaic mosaic) throws IOException{
-        boolean success = putValue(this.regsQuantity, mosaic);
+        boolean success = putValue(0, mosaic);
         if(success){
             ++this.regsQuantity;
         }
